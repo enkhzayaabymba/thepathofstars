@@ -1,4 +1,5 @@
 import Link from "next/link";
+import NavAuth from "@/components/NavAuth";
 
 const links = [
   { href: "/", label: "Home" },
@@ -29,13 +30,7 @@ export default function Navbar() {
             </Link>
           ))}
 
-          <Link
-            href="/reading"
-            style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)" }}
-            className="text-sm px-5 py-2 rounded-full hover:opacity-80 transition-opacity"
-          >
-            Get a Reading
-          </Link>
+          <NavAuth />
         </nav>
       </div>
     </header>
