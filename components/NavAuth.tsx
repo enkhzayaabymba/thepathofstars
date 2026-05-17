@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
 export default function NavAuth() {
   const router = useRouter();
   const [email, setEmail] = useState<string | null>(null);
@@ -27,8 +29,19 @@ export default function NavAuth() {
   }
 
   if (email) {
+    const isAdmin = email === ADMIN_EMAIL;
+
     return (
       <div className="flex items-center gap-4">
+        {isAdmin && (
+          <Link
+            href="/admin"
+            style={{ backgroundColor: "var(--surface)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+            className="text-xs px-4 py-2 rounded-full hover:opacity-70 transition-opacity font-medium"
+          >
+            ◈ Admin
+          </Link>
+        )}
         <span style={{ color: "var(--text-secondary)" }} className="text-xs hidden md:block">
           {email}
         </span>
