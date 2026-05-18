@@ -3,6 +3,7 @@
 import { useState } from "react";
 import TarotCard from "@/components/TarotCard";
 import { Product } from "@/lib/types";
+import { useCart } from "@/lib/CartContext";
 
 const categories = ["All", "Deck", "Oracle", "Accessory"];
 
@@ -12,6 +13,7 @@ type Props = {
 
 export default function ShopClient({ products }: Props) {
   const [selected, setSelected] = useState("All");
+  const { addItem } = useCart();
 
   const filtered =
     selected === "All"
@@ -53,6 +55,7 @@ export default function ShopClient({ products }: Props) {
               description={product.description}
               imageUrl={product.image_url || undefined}
               price={product.price}
+              onAddToCart={() => addItem(product)}
             />
           ))}
         </div>

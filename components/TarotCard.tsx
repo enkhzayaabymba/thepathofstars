@@ -6,9 +6,10 @@ type Props = {
   imageUrl?: string;
   price?: number;
   onClick?: () => void;
+  onAddToCart?: () => void;
 };
 
-export default function TarotCard({ name, description, imageUrl, price, onClick }: Props) {
+export default function TarotCard({ name, description, imageUrl, price, onClick, onAddToCart }: Props) {
   return (
     <div
       style={{
@@ -52,7 +53,10 @@ export default function TarotCard({ name, description, imageUrl, price, onClick 
           <button
             style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)" }}
             className="text-xs px-4 py-2 rounded-full hover:opacity-80 transition-opacity"
-            onClick={(e) => { e.stopPropagation(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddToCart?.();
+            }}
           >
             Add to Cart
           </button>

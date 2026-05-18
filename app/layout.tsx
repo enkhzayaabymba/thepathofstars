@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
+import { CartProvider } from "@/lib/CartContext";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -14,19 +15,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={inter.className}>
       <body className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-main)" }}>
-        <Navbar />
-        <div className="flex-1">{children}</div>
+        <CartProvider>
+          <Navbar />
+          <div className="flex-1">{children}</div>
 
-        <footer style={{ borderTop: "1px solid var(--border)" }} className="py-8 mt-16">
-          <div className="max-w-300 mx-auto px-10 flex items-center justify-between">
-            <span style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">
-              ✦ The Path of Stars
-            </span>
-            <span style={{ color: "var(--text-secondary)" }} className="text-xs">
-              © 2025 All rights reserved
-            </span>
-          </div>
-        </footer>
+          <footer style={{ borderTop: "1px solid var(--border)" }} className="py-8 mt-16">
+            <div className="max-w-300 mx-auto px-10 flex items-center justify-between">
+              <span style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">
+                ✦ The Path of Stars
+              </span>
+              <span style={{ color: "var(--text-secondary)" }} className="text-xs">
+                © 2025 All rights reserved
+              </span>
+            </div>
+          </footer>
+        </CartProvider>
       </body>
     </html>
   );

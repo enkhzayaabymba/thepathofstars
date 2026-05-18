@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import NavAuth from "@/components/NavAuth";
+import CartButton from "@/components/CartButton";
 
 const links = [
   { href: "/", label: "Home" },
@@ -30,6 +33,7 @@ export default function Navbar() {
             </Link>
           ))}
 
+          <CartButton />
           <NavAuth />
         </nav>
       </div>
