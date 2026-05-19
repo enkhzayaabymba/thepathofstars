@@ -3,7 +3,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { Product } from "@/lib/types";
 
-// A cart item is a product + how many of it the user wants
 export type CartItem = {
   product: Product;
   quantity: number;
@@ -11,7 +10,7 @@ export type CartItem = {
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (product: Product) => void;
+  addItem: (product: Product, quantity: number) => void;
   removeItem: (productId: number) => void;
   clearCart: () => void;
   totalCount: number;
@@ -26,9 +25,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Load cart from localStorage when the app starts
   useEffect(() => {
     const saved = localStorage.getItem("cart");
-    if (saved) {
-      setItems(JSON.parse(saved));
-    }
+    if (saved) setItems(JSON.parse(saved));
   }, []);
 
   // Save cart to localStorage every time it changes
@@ -36,19 +33,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("cart", JSON.stringify(items));
   }, [items]);
 
-  function addItem(product: Product) {
+  function addItem(product: Product, quantity: number) {
     setItems((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
-        // Already in cart — just increase quantity
+        // Already in cart — add the chosen quantity on top
         return prev.map((item) =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      // Not in cart yet — add it with quantity 1
-      return [...prev, { product, quantity: 1 }];
+      // New product — add with chosen quantity
+      return [...prev, { product, quantity }];
     });
   }
 
@@ -75,7 +72,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Custom hook so components can easily access the cart
 export function useCart() {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart must be used inside CartProvider");
