@@ -5,12 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-const SEEN_KEY = "admin_seen_orders";
-
-function getUnseenCount(orderIds: string[]): number {
-  const seen = JSON.parse(localStorage.getItem(SEEN_KEY) || "[]") as string[];
-  return orderIds.filter((id) => !seen.includes(id)).length;
-}
+const LAST_VIEWED_KEY = "admin_orders_last_viewed";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -18,14 +13,18 @@ export default function AdminSidebar() {
 
   useEffect(() => {
     async function checkNew() {
-      const { data } = await supabase.from("orders").select("id, order_id");
+      const lastViewed = localStorage.getItem(LAST_VIEWED_KEY) ?? "1970-01-01T00:00:00.000Z";
+      const { data } = await supabase
+        .from("orders")
+        .select("id, order_id")
+        .gt("created_at", lastViewed);
       if (!data) return;
-      const ids = [...new Set(data.map((r) => (r.order_id ?? String(r.id)) as string))];
-      setNewOrders(getUnseenCount(ids));
+      const unique = new Set(data.map((r) => r.order_id ?? String(r.id)));
+      setNewOrders(unique.size);
     }
 
     checkNew();
-    const interval = setInterval(checkNew, 30000);
+    const interval = setInterval(checkNew, 10000);
 
     window.addEventListener("orders-seen", checkNew);
     return () => {

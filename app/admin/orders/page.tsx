@@ -44,11 +44,11 @@ export default function AdminOrdersPage() {
   async function fetchOrders(isInitial = false) {
     const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
     if (data) {
-      const grouped = groupOrders(data as Order[]);
-      setOrders(grouped);
-      const allIds = grouped.map((o) => o.order_id);
-      localStorage.setItem("admin_seen_orders", JSON.stringify(allIds));
-      window.dispatchEvent(new CustomEvent("orders-seen"));
+      setOrders(groupOrders(data as Order[]));
+      if (isInitial) {
+        localStorage.setItem("admin_orders_last_viewed", new Date().toISOString());
+        window.dispatchEvent(new CustomEvent("orders-seen"));
+      }
     }
     if (isInitial) setLoading(false);
   }
