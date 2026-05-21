@@ -4,22 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import ForgotPasswordForm from "@/components/ForgotPasswordForm";
+import { isValidEmail, friendlyError } from "@/lib/authHelpers";
 
 type Props = {
   mode: "login" | "signup";
 };
-
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function friendlyError(message: string): string {
-  if (message.includes("Invalid login credentials")) return "Wrong email or password.";
-  if (message.includes("Email not confirmed")) return "Please confirm your email before signing in.";
-  if (message.includes("User already registered")) return "An account with this email already exists.";
-  if (message.includes("rate limit")) return "Too many attempts. Please wait a moment and try again.";
-  return message;
-}
 
 export default function AuthForm({ mode }: Props) {
   const router = useRouter();
@@ -28,15 +18,14 @@ export default function AuthForm({ mode }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
 
-  const emailError = email.length > 0 && !isValidEmail(email) ? "Please enter a valid email address." : "";
+  const emailError = email.length > 0 && !isValidEmail(email)
+    ? "Please enter a valid email address."
+    : "";
   const passwordError = mode === "signup" && password.length > 0 && password.length < 8
     ? "Password must be at least 8 characters."
     : "";
-
   const isFormValid = mode === "signup"
     ? isValidEmail(email) && password.length >= 8
     : isValidEmail(email) && password.length > 0;
@@ -74,16 +63,6 @@ export default function AuthForm({ mode }: Props) {
     setLoading(false);
   }
 
-  async function handleResetPassword() {
-    if (!isValidEmail(resetEmail)) return;
-    setLoading(true);
-    await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setResetSent(true);
-    setLoading(false);
-  }
-
   const inputStyle = (hasError: boolean) => ({
     border: `1px solid ${hasError ? "#ef4444" : "var(--border)"}`,
     borderRadius: "8px",
@@ -95,63 +74,8 @@ export default function AuthForm({ mode }: Props) {
     outline: "none",
   });
 
-  // Forgot password view
   if (showReset) {
-    return (
-      <div
-        style={{
-          backgroundColor: "var(--white)",
-          border: "1px solid var(--border)",
-          borderRadius: "16px",
-          padding: "40px",
-        }}
-        className="w-full max-w-md"
-      >
-        <h1 style={{ color: "var(--text-primary)" }} className="text-2xl font-bold mb-2">
-          Reset password
-        </h1>
-        <p style={{ color: "var(--text-secondary)" }} className="text-sm mb-8">
-          We will send a password reset link to your email.
-        </p>
-
-        {resetSent ? (
-          <p className="text-green-600 text-sm mb-4">
-            Reset link sent! Check your email inbox.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <input
-              type="email"
-              placeholder="Your email"
-              value={resetEmail}
-              onChange={(e) => setResetEmail(e.target.value)}
-              style={inputStyle(false)}
-            />
-            <button
-              onClick={handleResetPassword}
-              disabled={loading || !isValidEmail(resetEmail)}
-              style={{
-                backgroundColor: "var(--text-primary)",
-                color: "var(--bg-main)",
-                borderRadius: "8px",
-                opacity: !isValidEmail(resetEmail) ? 0.4 : 1,
-              }}
-              className="w-full py-3 text-sm font-semibold transition-opacity"
-            >
-              {loading ? "Sending..." : "Send reset link"}
-            </button>
-          </div>
-        )}
-
-        <button
-          onClick={() => setShowReset(false)}
-          style={{ color: "var(--text-secondary)" }}
-          className="text-xs mt-6 hover:opacity-70 transition-opacity"
-        >
-          ← Back to sign in
-        </button>
-      </div>
-    );
+    return <ForgotPasswordForm onBack={() => setShowReset(false)} />;
   }
 
   return (
@@ -185,7 +109,6 @@ export default function AuthForm({ mode }: Props) {
         />
         {emailError && <p className="text-red-500 text-xs mb-2">{emailError}</p>}
 
-        {/* Password input with show/hide toggle */}
         <div className="relative mt-2">
           <input
             type={showPassword ? "text" : "password"}
@@ -209,7 +132,6 @@ export default function AuthForm({ mode }: Props) {
           <p style={{ color: "var(--text-secondary)" }} className="text-xs mb-2">Minimum 8 characters</p>
         )}
 
-        {/* Forgot password link — only on login */}
         {mode === "login" && (
           <button
             type="button"
