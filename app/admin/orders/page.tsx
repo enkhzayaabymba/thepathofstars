@@ -41,18 +41,22 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
+  async function fetchOrders(isInitial = false) {
+    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    if (data) {
+      const grouped = groupOrders(data as Order[]);
+      setOrders(grouped);
+      const allIds = grouped.map((o) => o.order_id);
+      localStorage.setItem("admin_seen_orders", JSON.stringify(allIds));
+      window.dispatchEvent(new CustomEvent("orders-seen"));
+    }
+    if (isInitial) setLoading(false);
+  }
+
   useEffect(() => {
-    supabase.from("orders").select("*").order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (data) {
-          const grouped = groupOrders(data as Order[]);
-          setOrders(grouped);
-          const allIds = grouped.map((o) => o.order_id);
-          localStorage.setItem("admin_seen_orders", JSON.stringify(allIds));
-          window.dispatchEvent(new CustomEvent("orders-seen"));
-        }
-        setLoading(false);
-      });
+    fetchOrders(true);
+    const interval = setInterval(() => fetchOrders(), 10000);
+    return () => clearInterval(interval);
   }, []);
 
   async function updateStatus(order_id: string, status: string) {
