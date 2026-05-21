@@ -44,7 +44,13 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     supabase.from("orders").select("*").order("created_at", { ascending: false })
       .then(({ data }) => {
-        if (data) setOrders(groupOrders(data as Order[]));
+        if (data) {
+          const grouped = groupOrders(data as Order[]);
+          setOrders(grouped);
+          const allIds = grouped.map((o) => o.order_id);
+          localStorage.setItem("admin_seen_orders", JSON.stringify(allIds));
+          window.dispatchEvent(new CustomEvent("orders-seen"));
+        }
         setLoading(false);
       });
   }, []);
