@@ -55,7 +55,7 @@ export default function ShopClient({ products }: Props) {
               description={product.description}
               imageUrl={product.image_url || undefined}
               price={product.price}
-              onAddToCart={() => addItem(product)}
+              onAddToCart={(quantity) => addItem(product, quantity)}
             />
           ))}
         </div>

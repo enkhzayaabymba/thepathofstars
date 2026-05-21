@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useCart } from "@/lib/CartContext";
+import { supabase } from "@/lib/supabase";
+import { placeOrder } from "@/lib/orderService";
 
 type Props = {
   isOpen: boolean;
@@ -9,6 +12,34 @@ type Props = {
 
 export default function CartDrawer({ isOpen, onClose }: Props) {
   const { items, removeItem, clearCart, totalPrice } = useCart();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function handleCheckout() {
+    setLoading(true);
+    setMessage(null);
+
+    // Get the current logged-in user
+    const { data } = await supabase.auth.getSession();
+    const userEmail = data.session?.user?.email;
+
+    if (!userEmail) {
+      setMessage("Please log in to place an order.");
+      setLoading(false);
+      return;
+    }
+
+    const error = await placeOrder(userEmail, items);
+
+    if (error) {
+      setMessage(error);
+    } else {
+      clearCart();
+      setMessage("Order placed! We will contact you soon.");
+    }
+
+    setLoading(false);
+  }
 
   return (
     <>
@@ -55,7 +86,7 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
               style={{ color: "var(--text-secondary)" }}
               className="text-sm text-center mt-10"
             >
-              Your cart is empty.
+              {message ?? "Your cart is empty."}
             </p>
           ) : (
             items.map((item) => (
@@ -124,6 +155,13 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
             className="px-6 py-5 flex flex-col gap-3"
             style={{ borderTop: "1px solid var(--border)" }}
           >
+            {/* Error or info message */}
+            {message && (
+              <p style={{ color: "var(--text-secondary)" }} className="text-xs text-center">
+                {message}
+              </p>
+            )}
+
             <div className="flex justify-between items-center">
               <span style={{ color: "var(--text-secondary)" }} className="text-sm">
                 Total
@@ -134,14 +172,17 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
             </div>
 
             <button
+              onClick={handleCheckout}
+              disabled={loading}
               style={{
                 backgroundColor: "var(--text-primary)",
                 color: "var(--bg-main)",
                 borderRadius: "100px",
+                opacity: loading ? 0.6 : 1,
               }}
-              className="w-full py-3 text-sm font-semibold hover:opacity-80 transition-opacity"
+              className="w-full py-3 text-sm font-semibold transition-opacity"
             >
-              Checkout
+              {loading ? "Placing order..." : "Checkout"}
             </button>
 
             <button

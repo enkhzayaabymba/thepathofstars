@@ -33,13 +33,21 @@ export default function NavAuth() {
 
     return (
       <div className="flex items-center gap-4">
-        {isAdmin && (
+        {isAdmin ? (
           <Link
             href="/admin"
             style={{ backgroundColor: "var(--surface)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
             className="text-xs px-4 py-2 rounded-full hover:opacity-70 transition-opacity font-medium"
           >
             ◈ Admin
+          </Link>
+        ) : (
+          <Link
+            href="/orders"
+            style={{ color: "var(--text-secondary)" }}
+            className="text-sm hover:opacity-70 transition-opacity"
+          >
+            My Orders
           </Link>
         )}
         <span style={{ color: "var(--text-secondary)" }} className="text-xs hidden md:block">

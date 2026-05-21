@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
@@ -8,23 +9,148 @@ type Props = {
   mode: "login" | "signup";
 };
 
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function friendlyError(message: string): string {
+  if (message.includes("Invalid login credentials")) return "Wrong email or password.";
+  if (message.includes("Email not confirmed")) return "Please confirm your email before signing in.";
+  if (message.includes("User already registered")) return "An account with this email already exists.";
+  if (message.includes("rate limit")) return "Too many attempts. Please wait a moment and try again.";
+  return message;
+}
+
 export default function AuthForm({ mode }: Props) {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+
+  const emailError = email.length > 0 && !isValidEmail(email) ? "Please enter a valid email address." : "";
+  const passwordError = mode === "signup" && password.length > 0 && password.length < 8
+    ? "Password must be at least 8 characters."
+    : "";
+
+  const isFormValid = mode === "signup"
+    ? isValidEmail(email) && password.length >= 8
+    : isValidEmail(email) && password.length > 0;
+
+  async function handleSubmit(e: React.SyntheticEvent) {
+    e.preventDefault();
+    if (!isFormValid) return;
+    setError("");
+    setLoading(true);
+
+    if (mode === "signup") {
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) setError(friendlyError(error.message));
+      else router.push("/login");
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) setError(friendlyError(error.message));
+      else router.push("/");
+    }
+
+    setLoading(false);
+  }
 
   async function handleGoogle() {
     setError("");
     setLoading(true);
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { prompt: "select_account" },
       },
     });
-
     if (error) setError(error.message);
     setLoading(false);
+  }
+
+  async function handleResetPassword() {
+    if (!isValidEmail(resetEmail)) return;
+    setLoading(true);
+    await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setResetSent(true);
+    setLoading(false);
+  }
+
+  const inputStyle = (hasError: boolean) => ({
+    border: `1px solid ${hasError ? "#ef4444" : "var(--border)"}`,
+    borderRadius: "8px",
+    backgroundColor: "var(--bg-main)",
+    color: "var(--text-primary)",
+    width: "100%",
+    padding: "10px 14px",
+    fontSize: "14px",
+    outline: "none",
+  });
+
+  // Forgot password view
+  if (showReset) {
+    return (
+      <div
+        style={{
+          backgroundColor: "var(--white)",
+          border: "1px solid var(--border)",
+          borderRadius: "16px",
+          padding: "40px",
+        }}
+        className="w-full max-w-md"
+      >
+        <h1 style={{ color: "var(--text-primary)" }} className="text-2xl font-bold mb-2">
+          Reset password
+        </h1>
+        <p style={{ color: "var(--text-secondary)" }} className="text-sm mb-8">
+          We will send a password reset link to your email.
+        </p>
+
+        {resetSent ? (
+          <p className="text-green-600 text-sm mb-4">
+            Reset link sent! Check your email inbox.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <input
+              type="email"
+              placeholder="Your email"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              style={inputStyle(false)}
+            />
+            <button
+              onClick={handleResetPassword}
+              disabled={loading || !isValidEmail(resetEmail)}
+              style={{
+                backgroundColor: "var(--text-primary)",
+                color: "var(--bg-main)",
+                borderRadius: "8px",
+                opacity: !isValidEmail(resetEmail) ? 0.4 : 1,
+              }}
+              className="w-full py-3 text-sm font-semibold transition-opacity"
+            >
+              {loading ? "Sending..." : "Send reset link"}
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={() => setShowReset(false)}
+          style={{ color: "var(--text-secondary)" }}
+          className="text-xs mt-6 hover:opacity-70 transition-opacity"
+        >
+          ← Back to sign in
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -44,11 +170,66 @@ export default function AuthForm({ mode }: Props) {
         {mode === "login" ? "Sign in to continue your journey" : "Begin your cosmic journey"}
       </p>
 
-      {error && (
-        <p className="text-red-500 text-xs mb-4">{error}</p>
-      )}
+      {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
 
-      {/* Google button */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-1 mb-4">
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={inputStyle(!!emailError)}
+          className="mb-1"
+        />
+        {emailError && <p className="text-red-500 text-xs mb-2">{emailError}</p>}
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={inputStyle(!!passwordError)}
+          className="mb-1 mt-2"
+        />
+        {passwordError && <p className="text-red-500 text-xs mb-2">{passwordError}</p>}
+        {mode === "signup" && !passwordError && password.length === 0 && (
+          <p style={{ color: "var(--text-secondary)" }} className="text-xs mb-2">Minimum 8 characters</p>
+        )}
+
+        {/* Forgot password link — only on login */}
+        {mode === "login" && (
+          <button
+            type="button"
+            onClick={() => setShowReset(true)}
+            style={{ color: "var(--text-secondary)" }}
+            className="text-xs text-right hover:opacity-70 transition-opacity mb-1"
+          >
+            Forgot password?
+          </button>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading || !isFormValid}
+          style={{
+            backgroundColor: "var(--text-primary)",
+            color: "var(--bg-main)",
+            borderRadius: "8px",
+            marginTop: "8px",
+            opacity: !isFormValid ? 0.4 : 1,
+          }}
+          className="w-full py-3 text-sm font-semibold transition-opacity"
+        >
+          {loading ? "Please wait..." : mode === "login" ? "Sign in" : "Sign up"}
+        </button>
+      </form>
+
+      <div className="flex items-center gap-3 mb-4">
+        <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border)" }} />
+        <span style={{ color: "var(--text-secondary)" }} className="text-xs">or</span>
+        <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border)" }} />
+      </div>
+
       <button
         onClick={handleGoogle}
         disabled={loading}
@@ -61,16 +242,12 @@ export default function AuthForm({ mode }: Props) {
           <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.6 26.8 36 24 36c-5.2 0-9.6-2.9-11.3-7.1l-6.5 5C9.8 39.8 16.4 44 24 44z"/>
           <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.4 4.2-4.4 5.5l6.2 5.2C41 35.4 44 30.1 44 24c0-1.3-.1-2.7-.4-4z"/>
         </svg>
-        {loading ? "Redirecting..." : `Continue with Google`}
+        Continue with Google
       </button>
 
       <p style={{ color: "var(--text-secondary)" }} className="text-xs text-center mt-6">
         {mode === "login" ? "Don't have an account? " : "Already have an account? "}
-        <Link
-          href={mode === "login" ? "/signup" : "/login"}
-          style={{ color: "var(--text-primary)" }}
-          className="font-semibold underline"
-        >
+        <Link href={mode === "login" ? "/signup" : "/login"} style={{ color: "var(--text-primary)" }} className="font-semibold underline">
           {mode === "login" ? "Sign up" : "Sign in"}
         </Link>
       </p>

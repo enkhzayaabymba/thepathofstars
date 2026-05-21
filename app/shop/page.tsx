@@ -4,10 +4,7 @@ import { Product } from "@/lib/types";
 
 async function getProducts(): Promise<Product[]> {
   const { data, error } = await supabase.from("products").select("*");
-  if (error) {
-    console.error("Error fetching products:", error.message);
-    return [];
-  }
+  if (error) return [];
   return data as Product[];
 }
 

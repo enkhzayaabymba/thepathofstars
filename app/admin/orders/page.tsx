@@ -1,23 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-
-type Order = {
-  id: number;
-  user_email: string;
-  product_name: string;
-  price: number;
-  status: string;
-  created_at: string;
-};
-
-async function getOrders(): Promise<Order[]> {
-  const { data, error } = await supabase
-    .from("orders")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) return [];
-  return data as Order[];
-}
+import { Order } from "@/lib/types";
 
 const statusStyle: Record<string, { color: string; bg: string; label: string }> = {
   completed: { color: "#16a34a", bg: "#dcfce7", label: "Completed" },
@@ -25,22 +10,76 @@ const statusStyle: Record<string, { color: string; bg: string; label: string }> 
   cancelled: { color: "#dc2626", bg: "#fee2e2", label: "Cancelled" },
 };
 
-export default async function OrdersPage() {
-  const orders = await getOrders();
+// Group individual order rows by order_id into one "order"
+type GroupedOrder = {
+  order_id: string;
+  user_email: string;
+  items: string[];
+  total: number;
+  status: string;
+  created_at: string;
+};
+
+function groupOrders(orders: Order[]): GroupedOrder[] {
+  const map = new Map<string, GroupedOrder>();
+
+  for (const row of orders) {
+    const key = row.order_id ?? String(row.id);
+    if (!map.has(key)) {
+      map.set(key, {
+        order_id: key,
+        user_email: row.user_email,
+        items: [],
+        total: 0,
+        status: row.status,
+        created_at: row.created_at,
+      });
+    }
+    const group = map.get(key)!;
+    group.items.push(row.product_name);
+    group.total += Number(row.price);
+  }
+
+  return Array.from(map.values());
+}
+
+export default function OrdersPage() {
+  const [grouped, setGrouped] = useState<GroupedOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchOrders() {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && data) setGrouped(groupOrders(data as Order[]));
+      setLoading(false);
+    }
+
+    fetchOrders();
+  }, []);
+
+  if (loading) {
+    return (
+      <p style={{ color: "var(--text-secondary)" }} className="text-sm">
+        Loading orders...
+      </p>
+    );
+  }
 
   return (
     <div className="max-w-5xl">
-      {/* Header */}
       <div className="mb-10">
         <h1 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold mb-1">
           Orders
         </h1>
         <p style={{ color: "var(--text-secondary)" }} className="text-sm">
-          {orders.length} total orders
+          {grouped.length} total orders
         </p>
       </div>
 
-      {/* Table */}
       <div
         style={{
           backgroundColor: "var(--white)",
@@ -52,33 +91,33 @@ export default async function OrdersPage() {
         {/* Table header */}
         <div
           style={{ borderBottom: "1px solid var(--border)", backgroundColor: "var(--surface)" }}
-          className="grid grid-cols-6 px-6 py-3"
+          className="grid grid-cols-5 px-6 py-3"
         >
-          {["ID", "Customer", "Product", "Price", "Status", "Date"].map((h) => (
+          {["Customer", "Items", "Total", "Status", "Date"].map((h) => (
             <p key={h} style={{ color: "var(--text-secondary)" }} className="text-xs font-semibold uppercase tracking-wide">
               {h}
             </p>
           ))}
         </div>
 
-        {/* Rows */}
-        {orders.length === 0 ? (
+        {grouped.length === 0 ? (
           <p style={{ color: "var(--text-secondary)" }} className="text-sm px-6 py-8">
             No orders yet.
           </p>
         ) : (
-          orders.map((order) => {
+          grouped.map((order) => {
             const s = statusStyle[order.status] ?? { color: "#6b7280", bg: "#f3f4f6", label: order.status };
             return (
               <div
-                key={order.id}
+                key={order.order_id}
                 style={{ borderBottom: "1px solid var(--border)" }}
-                className="grid grid-cols-6 px-6 py-4 items-center hover:opacity-80 transition-opacity"
+                className="grid grid-cols-5 px-6 py-4 items-center"
               >
-                <p style={{ color: "var(--text-secondary)" }} className="text-sm">#{order.id}</p>
                 <p style={{ color: "var(--text-primary)" }} className="text-sm truncate pr-2">{order.user_email}</p>
-                <p style={{ color: "var(--text-primary)" }} className="text-sm truncate pr-2">{order.product_name}</p>
-                <p style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">${Number(order.price).toFixed(2)}</p>
+                <p style={{ color: "var(--text-primary)" }} className="text-sm truncate pr-2">
+                  {order.items.join(", ")}
+                </p>
+                <p style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">${order.total.toFixed(2)}</p>
                 <span
                   style={{ color: s.color, backgroundColor: s.bg, borderRadius: "4px", width: "fit-content" }}
                   className="text-xs font-medium px-2 py-1"
