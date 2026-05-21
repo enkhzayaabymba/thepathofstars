@@ -27,6 +27,7 @@ export default function AuthForm({ mode }: Props) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -177,21 +178,33 @@ export default function AuthForm({ mode }: Props) {
           type="email"
           placeholder="Email"
           value={email}
+          autoComplete="off"
           onChange={(e) => setEmail(e.target.value)}
           style={inputStyle(!!emailError)}
           className="mb-1"
         />
         {emailError && <p className="text-red-500 text-xs mb-2">{emailError}</p>}
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={inputStyle(!!passwordError)}
-          className="mb-1 mt-2"
-        />
-        {passwordError && <p className="text-red-500 text-xs mb-2">{passwordError}</p>}
+        {/* Password input with show/hide toggle */}
+        <div className="relative mt-2">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            autoComplete="new-password"
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ ...inputStyle(!!passwordError), paddingRight: "44px" }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            style={{ color: "var(--text-secondary)", position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)" }}
+            className="text-xs hover:opacity-70 transition-opacity"
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
+        {passwordError && <p className="text-red-500 text-xs mb-2 mt-1">{passwordError}</p>}
         {mode === "signup" && !passwordError && password.length === 0 && (
           <p style={{ color: "var(--text-secondary)" }} className="text-xs mb-2">Minimum 8 characters</p>
         )}
