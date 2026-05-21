@@ -10,23 +10,13 @@ export async function placeOrder(userEmail: string, items: CartItem[]): Promise<
     order_id,
     user_email: userEmail,
     product_name: item.product.name,
-    price: item.product.price * item.quantity,
+    image_url: item.product.image_url ?? null,
+    price: item.product.price,
+    quantity: item.quantity,
     status: "pending",
   }));
 
   let { error } = await supabase.from("orders").insert(rows);
-
-  // If order_id column doesn't exist yet, retry without it
-  if (error?.message.includes("order_id")) {
-    const rowsWithoutOrderId = items.map((item) => ({
-      user_email: userEmail,
-      product_name: item.product.name,
-      price: item.product.price * item.quantity,
-      status: "pending",
-    }));
-    const retry = await supabase.from("orders").insert(rowsWithoutOrderId);
-    error = retry.error;
-  }
 
   if (error) return error.message;
   return null;

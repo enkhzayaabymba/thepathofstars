@@ -4,17 +4,19 @@ import { useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Product } from "@/lib/types";
 
-type Props = { initialProducts: Product[] };
+type Props = { initialProducts: Product[]; categories: string[] };
 type FormData = { name: string; description: string; price: string; category: string };
-
-const categories = ["Deck", "Oracle", "Accessory"];
-const emptyForm: FormData = { name: "", description: "", price: "", category: "Deck" };
 const inputStyle = { border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)", backgroundColor: "var(--white)" };
 
-export default function ProductsClient({ initialProducts }: Props) {
+export default function ProductsClient({ initialProducts, categories }: Props) {
+  const [categoryList, setCategoryList] = useState(categories);
+  const emptyForm = (): FormData => ({ name: "", description: "", price: "", category: categoryList[0] ?? "" });
+
   const formRef = useRef<HTMLDivElement>(null);
   const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [form, setForm] = useState<FormData>(emptyForm);
+  const [form, setForm] = useState<FormData>(emptyForm());
+  const [newCat, setNewCat] = useState("");
+  const [addingCat, setAddingCat] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -39,7 +41,7 @@ export default function ProductsClient({ initialProducts }: Props) {
 
   function cancelEdit() {
     setEditingId(null);
-    setForm(emptyForm);
+    setForm(emptyForm());
     setPreview("");
     setImageFile(null);
   }
@@ -51,36 +53,34 @@ export default function ProductsClient({ initialProducts }: Props) {
     return supabase.storage.from("products").getPublicUrl(fileName).data.publicUrl;
   }
 
+  async function addCategory() {
+    if (!newCat.trim() || addingCat) return;
+    setAddingCat(true);
+    const { data } = await supabase.from("categories").insert({ name: newCat.trim() }).select("name").single();
+    if (data) { setCategoryList([...categoryList, data.name]); setForm({ ...form, category: data.name }); setNewCat(""); }
+    setAddingCat(false);
+  }
+
   async function handleSubmit(e: React.BaseSyntheticEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       let image_url = preview;
       if (imageFile) image_url = await uploadImage(imageFile);
 
       if (editingId !== null) {
-        const { data, error } = await supabase
-          .from("products")
-          .update({ ...form, price: Number(form.price), image_url })
-          .eq("id", editingId)
-          .select()
-          .single();
+        const { data, error } = await supabase.from("products").update({ ...form, price: Number(form.price), image_url }).eq("id", editingId).select().single();
         if (error) throw new Error(error.message);
         setProducts(products.map((p) => (p.id === editingId ? (data as Product) : p)));
         setEditingId(null);
       } else {
-        const { data, error } = await supabase
-          .from("products")
-          .insert({ ...form, price: Number(form.price), image_url })
-          .select()
-          .single();
+        const { data, error } = await supabase.from("products").insert({ ...form, price: Number(form.price), image_url }).select().single();
         if (error) throw new Error(error.message);
         setProducts([...products, data as Product]);
       }
 
-      setForm(emptyForm);
+      setForm(emptyForm());
       setImageFile(null);
       setPreview("");
     } catch (err: unknown) {
@@ -96,7 +96,6 @@ export default function ProductsClient({ initialProducts }: Props) {
 
   return (
     <div className="max-w-5xl">
-      {/* Form */}
       <div ref={formRef} style={{ backgroundColor: editingId ? "var(--surface)" : "var(--white)", border: `1px solid ${editingId ? "var(--text-secondary)" : "var(--border)"}`, borderRadius: "16px", padding: "28px" }} className="mb-10 transition-all">
         <h2 style={{ color: "var(--text-primary)" }} className="font-semibold text-base mb-6">
           {editingId ? "✎ Editing Product" : "Add New Product"}
@@ -119,8 +118,20 @@ export default function ProductsClient({ initialProducts }: Props) {
             <label style={{ color: "var(--text-secondary)" }} className="text-xs">Category</label>
             <select style={inputStyle} className="px-3 py-2 text-sm outline-none"
               value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-              {categories.map((c) => <option key={c}>{c}</option>)}
+              {categoryList.map((c) => <option key={c}>{c}</option>)}
             </select>
+            <div className="flex gap-2 mt-1">
+              <input style={{ ...inputStyle, flex: 1 }} className="px-3 py-1.5 text-xs outline-none"
+                placeholder="New category..."
+                value={newCat}
+                onChange={(e) => setNewCat(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCategory(); } }} />
+              <button type="button" onClick={addCategory} disabled={addingCat || !newCat.trim()}
+                style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)", borderRadius: "8px", opacity: !newCat.trim() ? 0.4 : 1 }}
+                className="px-3 py-1.5 text-xs font-medium transition-opacity whitespace-nowrap">
+                + Add
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col gap-1">
@@ -160,7 +171,6 @@ export default function ProductsClient({ initialProducts }: Props) {
         </form>
       </div>
 
-      {/* Products list */}
       <div style={{ backgroundColor: "var(--white)", border: "1px solid var(--border)", borderRadius: "16px", overflow: "hidden" }}>
         <div style={{ borderBottom: "1px solid var(--border)", backgroundColor: "var(--surface)" }} className="grid grid-cols-6 px-6 py-3">
           {["Image", "Name", "Category", "Price", "", ""].map((h, i) => (

@@ -2,29 +2,31 @@
 
 import { useState } from "react";
 import TarotCard from "@/components/TarotCard";
-import { Product } from "@/lib/types";
+import ProductModal from "@/components/ProductModal";
+import { Product, Category } from "@/lib/types";
 import { useCart } from "@/lib/CartContext";
-
-const categories = ["All", "Deck", "Oracle", "Accessory"];
 
 type Props = {
   products: Product[];
+  categories: Category[];
 };
 
-export default function ShopClient({ products }: Props) {
+export default function ShopClient({ products, categories }: Props) {
   const [selected, setSelected] = useState("All");
+  const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const { addItem } = useCart();
 
-  const filtered =
-    selected === "All"
-      ? products
-      : products.filter((p) => p.category === selected);
+  const allCategories = ["All", ...categories.map((c) => c.name)];
+
+  const filtered = selected === "All"
+    ? products
+    : products.filter((p) => p.category === selected);
 
   return (
     <div>
       {/* Category filters */}
       <div className="flex gap-3 mb-10 flex-wrap">
-        {categories.map((cat) => (
+        {allCategories.map((cat) => (
           <button
             key={cat}
             onClick={() => setSelected(cat)}
@@ -55,10 +57,23 @@ export default function ShopClient({ products }: Props) {
               description={product.description}
               imageUrl={product.image_url || undefined}
               price={product.price}
+              onClick={() => setActiveProduct(product)}
               onAddToCart={(quantity) => addItem(product, quantity)}
             />
           ))}
         </div>
+      )}
+
+      {/* Product detail modal */}
+      {activeProduct && (
+        <ProductModal
+          product={activeProduct}
+          onClose={() => setActiveProduct(null)}
+          onAddToCart={(quantity) => {
+            addItem(activeProduct, quantity);
+            setActiveProduct(null);
+          }}
+        />
       )}
     </div>
   );

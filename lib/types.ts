@@ -18,12 +18,19 @@ export type Product = {
 
 export type ReadingType = "one-card" | "three-card" | "celtic-cross";
 
+export type Category = {
+  id: number;
+  name: string;
+};
+
 export type Order = {
   id: number;
   order_id: string;
   user_email: string;
   product_name: string;
+  image_url: string | null;
   price: number;
+  quantity: number;
   status: string;
   created_at: string;
 };

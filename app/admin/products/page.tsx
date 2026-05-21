@@ -1,6 +1,6 @@
 import ProductsClient from "@/components/admin/ProductsClient";
 import { supabase } from "@/lib/supabase";
-import { Product } from "@/lib/types";
+import { Product, Category } from "@/lib/types";
 
 async function getProducts(): Promise<Product[]> {
   const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
@@ -8,8 +8,14 @@ async function getProducts(): Promise<Product[]> {
   return data as Product[];
 }
 
+async function getCategories(): Promise<Category[]> {
+  const { data, error } = await supabase.from("categories").select("*").order("name");
+  if (error) return [];
+  return data as Category[];
+}
+
 export default async function AdminProductsPage() {
-  const products = await getProducts();
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
 
   return (
     <div>
@@ -22,7 +28,7 @@ export default async function AdminProductsPage() {
         </p>
       </div>
 
-      <ProductsClient initialProducts={products} />
+      <ProductsClient initialProducts={products} categories={categories.map((c) => c.name)} />
     </div>
   );
 }

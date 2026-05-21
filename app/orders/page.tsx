@@ -5,20 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { getMyOrders } from "@/lib/orderService";
 import { Order } from "@/lib/types";
-
-const statusStyle: Record<string, { color: string; bg: string; label: string }> = {
-  completed: { color: "#16a34a", bg: "#dcfce7", label: "Completed" },
-  pending:   { color: "#d97706", bg: "#fef3c7", label: "Pending" },
-  cancelled: { color: "#dc2626", bg: "#fee2e2", label: "Cancelled" },
-};
-
-type GroupedOrder = {
-  order_id: string;
-  items: string[];
-  total: number;
-  status: string;
-  created_at: string;
-};
+import OrderCard, { GroupedOrder } from "@/components/OrderCard";
 
 function groupOrders(orders: Order[]): GroupedOrder[] {
   const map = new Map<string, GroupedOrder>();
@@ -35,8 +22,8 @@ function groupOrders(orders: Order[]): GroupedOrder[] {
       });
     }
     const group = map.get(key)!;
-    group.items.push(row.product_name);
-    group.total += Number(row.price);
+    group.items.push(row);
+    group.total += Number(row.price) * (row.quantity ?? 1);
   }
 
   return Array.from(map.values());
@@ -76,7 +63,7 @@ export default function MyOrdersPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-16">
+    <div className="max-w-2xl mx-auto px-6 py-16">
       <h1 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold mb-2">
         My Orders
       </h1>
@@ -85,48 +72,9 @@ export default function MyOrdersPage() {
       </p>
 
       <div className="flex flex-col gap-4">
-        {grouped.map((order) => {
-          const s = statusStyle[order.status] ?? {
-            color: "#6b7280",
-            bg: "#f3f4f6",
-            label: order.status,
-          };
-
-          return (
-            <div
-              key={order.order_id}
-              style={{
-                backgroundColor: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "12px",
-              }}
-              className="px-6 py-4 flex items-center justify-between gap-4"
-            >
-              {/* Left: items + date */}
-              <div className="flex flex-col gap-1">
-                <p style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">
-                  {order.items.join(", ")}
-                </p>
-                <p style={{ color: "var(--text-secondary)" }} className="text-xs">
-                  {new Date(order.created_at).toLocaleDateString()}
-                </p>
-              </div>
-
-              {/* Right: total + status */}
-              <div className="flex items-center gap-4 shrink-0">
-                <p style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">
-                  ${order.total.toFixed(2)}
-                </p>
-                <span
-                  style={{ color: s.color, backgroundColor: s.bg, borderRadius: "4px" }}
-                  className="text-xs font-medium px-2 py-1"
-                >
-                  {s.label}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+        {grouped.map((order) => (
+          <OrderCard key={order.order_id} order={order} />
+        ))}
       </div>
     </div>
   );
