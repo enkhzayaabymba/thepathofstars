@@ -4,133 +4,123 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Order } from "@/lib/types";
 
-const statusStyle: Record<string, { color: string; bg: string; label: string }> = {
-  completed: { color: "#16a34a", bg: "#dcfce7", label: "Completed" },
-  pending:   { color: "#d97706", bg: "#fef3c7", label: "Pending" },
-  cancelled: { color: "#dc2626", bg: "#fee2e2", label: "Cancelled" },
-};
+const STATUSES = [
+  { value: "pending",          label: "Хүлээгдэж байна",  color: "#d97706", bg: "#fef3c7" },
+  { value: "preparing",        label: "Бэлтгэж байна",     color: "#2563eb", bg: "#dbeafe" },
+  { value: "out_for_delivery", label: "Хүргэлтэнд гарсан", color: "#7c3aed", bg: "#ede9fe" },
+  { value: "delivered",        label: "Хүргэгдсэн",        color: "#16a34a", bg: "#dcfce7" },
+  { value: "cancelled",        label: "Цуцлагдсан",        color: "#dc2626", bg: "#fee2e2" },
+];
 
-// Group individual order rows by order_id into one "order"
-type GroupedOrder = {
+const COLS = "minmax(0,2fr) minmax(0,3fr) 72px minmax(0,2fr)";
+
+type AdminOrder = {
   order_id: string;
   user_email: string;
-  items: string[];
+  items: Order[];
   total: number;
   status: string;
   created_at: string;
 };
 
-function groupOrders(orders: Order[]): GroupedOrder[] {
-  const map = new Map<string, GroupedOrder>();
-
+function groupOrders(orders: Order[]): AdminOrder[] {
+  const map = new Map<string, AdminOrder>();
   for (const row of orders) {
     const key = row.order_id ?? String(row.id);
     if (!map.has(key)) {
-      map.set(key, {
-        order_id: key,
-        user_email: row.user_email,
-        items: [],
-        total: 0,
-        status: row.status,
-        created_at: row.created_at,
-      });
+      map.set(key, { order_id: key, user_email: row.user_email, items: [], total: 0, status: row.status, created_at: row.created_at });
     }
-    const group = map.get(key)!;
-    group.items.push(row.product_name);
-    group.total += Number(row.price);
+    const g = map.get(key)!;
+    g.items.push(row);
+    g.total += Number(row.price) * (row.quantity ?? 1);
   }
-
   return Array.from(map.values());
 }
 
-export default function OrdersPage() {
-  const [grouped, setGrouped] = useState<GroupedOrder[]>([]);
+export default function AdminOrdersPage() {
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchOrders() {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data) setGrouped(groupOrders(data as Order[]));
-      setLoading(false);
-    }
-
-    fetchOrders();
+    supabase.from("orders").select("*").order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setOrders(groupOrders(data as Order[]));
+        setLoading(false);
+      });
   }, []);
 
-  if (loading) {
-    return (
-      <p style={{ color: "var(--text-secondary)" }} className="text-sm">
-        Loading orders...
-      </p>
-    );
+  async function updateStatus(order_id: string, status: string) {
+    const { error } = await supabase.from("orders").update({ status }).eq("order_id", order_id);
+    if (error) { alert("Update failed: " + error.message); return; }
+    setOrders((prev) => prev.map((o) => o.order_id === order_id ? { ...o, status } : o));
   }
+
+  if (loading) return <p style={{ color: "var(--text-secondary)" }} className="text-sm">Loading...</p>;
 
   return (
     <div className="max-w-5xl">
       <div className="mb-10">
-        <h1 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold mb-1">
-          Orders
-        </h1>
-        <p style={{ color: "var(--text-secondary)" }} className="text-sm">
-          {grouped.length} total orders
-        </p>
+        <h1 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold mb-1">Orders</h1>
+        <p style={{ color: "var(--text-secondary)" }} className="text-sm">{orders.length} total orders</p>
       </div>
 
-      <div
-        style={{
-          backgroundColor: "var(--white)",
-          border: "1px solid var(--border)",
-          borderRadius: "16px",
-          overflow: "hidden",
-        }}
-      >
-        {/* Table header */}
-        <div
-          style={{ borderBottom: "1px solid var(--border)", backgroundColor: "var(--surface)" }}
-          className="grid grid-cols-5 px-6 py-3"
-        >
-          {["Customer", "Items", "Total", "Status", "Date"].map((h) => (
-            <p key={h} style={{ color: "var(--text-secondary)" }} className="text-xs font-semibold uppercase tracking-wide">
-              {h}
-            </p>
+      <div style={{ backgroundColor: "var(--white)", border: "1px solid var(--border)", borderRadius: "16px", overflow: "hidden" }}>
+        {/* Header */}
+        <div className="grid gap-x-6 px-6 py-3"
+          style={{ gridTemplateColumns: COLS, borderBottom: "1px solid var(--border)", backgroundColor: "var(--surface)" }}>
+          {["Захиалагч", "Бараа", "Нийт", "Төлөв"].map((h) => (
+            <p key={h} style={{ color: "var(--text-secondary)" }} className="text-xs font-semibold uppercase tracking-wide">{h}</p>
           ))}
         </div>
 
-        {grouped.length === 0 ? (
-          <p style={{ color: "var(--text-secondary)" }} className="text-sm px-6 py-8">
-            No orders yet.
-          </p>
-        ) : (
-          grouped.map((order) => {
-            const s = statusStyle[order.status] ?? { color: "#6b7280", bg: "#f3f4f6", label: order.status };
-            return (
-              <div
-                key={order.order_id}
-                style={{ borderBottom: "1px solid var(--border)" }}
-                className="grid grid-cols-5 px-6 py-4 items-center"
-              >
-                <p style={{ color: "var(--text-primary)" }} className="text-sm truncate pr-2">{order.user_email}</p>
-                <p style={{ color: "var(--text-primary)" }} className="text-sm truncate pr-2">
-                  {order.items.join(", ")}
-                </p>
-                <p style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">${order.total.toFixed(2)}</p>
-                <span
-                  style={{ color: s.color, backgroundColor: s.bg, borderRadius: "4px", width: "fit-content" }}
-                  className="text-xs font-medium px-2 py-1"
-                >
-                  {s.label}
-                </span>
-                <p style={{ color: "var(--text-secondary)" }} className="text-sm">
-                  {new Date(order.created_at).toLocaleDateString()}
+        {orders.length === 0 ? (
+          <p style={{ color: "var(--text-secondary)" }} className="text-sm px-6 py-8">No orders yet.</p>
+        ) : orders.map((order) => {
+          const s = STATUSES.find((st) => st.value === order.status) ?? STATUSES[0];
+          return (
+            <div key={order.order_id} className="grid gap-x-6 px-6 py-5 items-start"
+              style={{ gridTemplateColumns: COLS, borderBottom: "1px solid var(--border)" }}>
+
+              {/* Customer */}
+              <div className="flex flex-col gap-0.5 pt-0.5">
+                <p style={{ color: "var(--text-primary)" }} className="text-sm font-medium truncate">{order.user_email}</p>
+                <p style={{ color: "var(--text-secondary)" }} className="text-xs">
+                  {new Date(order.created_at).toLocaleDateString()} · #{order.order_id.slice(0, 8)}
                 </p>
               </div>
-            );
-          })
-        )}
+
+              {/* Items */}
+              <div className="flex flex-col gap-2.5">
+                {order.items.map((item) => (
+                  <div key={item.id} className="flex items-center gap-2.5">
+                    <div style={{ width: "38px", height: "38px", borderRadius: "6px", backgroundColor: "var(--surface)", border: "1px solid var(--border)", flexShrink: 0, overflow: "hidden" }}
+                      className="flex items-center justify-center">
+                      {item.image_url
+                        ? <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
+                        : <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>✦</span>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p style={{ color: "var(--text-primary)" }} className="text-xs font-medium truncate">{item.product_name}</p>
+                      <p style={{ color: "var(--text-secondary)" }} className="text-xs">${Number(item.price).toFixed(2)} × {item.quantity ?? 1}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total */}
+              <p style={{ color: "var(--text-primary)" }} className="text-sm font-bold pt-0.5">${order.total.toFixed(2)}</p>
+
+              {/* Status dropdown */}
+              <select
+                value={order.status}
+                onChange={(e) => updateStatus(order.order_id, e.target.value)}
+                style={{ border: `1px solid ${s.color}`, color: s.color, backgroundColor: s.bg, borderRadius: "8px", fontSize: "12px", padding: "5px 8px", outline: "none", cursor: "pointer", fontWeight: 500, width: "100%" }}
+              >
+                {STATUSES.map((st) => <option key={st.value} value={st.value}>{st.label}</option>)}
+              </select>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

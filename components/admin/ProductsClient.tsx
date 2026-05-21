@@ -97,9 +97,7 @@ export default function ProductsClient({ initialProducts, categories }: Props) {
   return (
     <div className="max-w-5xl">
       <div ref={formRef} style={{ backgroundColor: editingId ? "var(--surface)" : "var(--white)", border: `1px solid ${editingId ? "var(--text-secondary)" : "var(--border)"}`, borderRadius: "16px", padding: "28px" }} className="mb-10 transition-all">
-        <h2 style={{ color: "var(--text-primary)" }} className="font-semibold text-base mb-6">
-          {editingId ? "✎ Editing Product" : "Add New Product"}
-        </h2>
+        <h2 style={{ color: "var(--text-primary)" }} className="font-semibold text-base mb-6">{editingId ? "✎ Editing Product" : "Add New Product"}</h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
