@@ -37,9 +37,12 @@ function groupOrders(orders: Order[]): AdminOrder[] {
   return Array.from(map.values());
 }
 
+const PAGE_SIZE = 8;
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   async function fetchOrders(isInitial = false) {
     const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
@@ -65,6 +68,9 @@ export default function AdminOrdersPage() {
     setOrders((prev) => prev.map((o) => o.order_id === order_id ? { ...o, status } : o));
   }
 
+  const totalPages = Math.ceil(orders.length / PAGE_SIZE);
+  const paginated = orders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   if (loading) return <p style={{ color: "var(--text-secondary)" }} className="text-sm">Loading...</p>;
 
   return (
@@ -85,7 +91,7 @@ export default function AdminOrdersPage() {
 
         {orders.length === 0 ? (
           <p style={{ color: "var(--text-secondary)" }} className="text-sm px-6 py-8">No orders yet.</p>
-        ) : orders.map((order) => {
+        ) : paginated.map((order) => {
           const s = STATUSES.find((st) => st.value === order.status) ?? STATUSES[0];
           return (
             <div key={order.order_id} className="grid gap-x-6 px-6 py-5 items-start"
@@ -132,6 +138,27 @@ export default function AdminOrdersPage() {
           );
         })}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center gap-2 mt-6 justify-center">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              style={{
+                width: "36px", height: "36px", borderRadius: "50%",
+                backgroundColor: page === p ? "var(--text-primary)" : "transparent",
+                color: page === p ? "var(--bg-main)" : "var(--text-secondary)",
+                border: `1px solid ${page === p ? "var(--text-primary)" : "var(--border)"}`,
+                fontSize: "13px", fontWeight: page === p ? 600 : 400,
+              }}
+              className="transition-all hover:opacity-70"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

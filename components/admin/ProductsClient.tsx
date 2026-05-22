@@ -14,6 +14,9 @@ export default function ProductsClient({ initialProducts, categories }: Props) {
 
   const formRef = useRef<HTMLDivElement>(null);
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [selectedCat, setSelectedCat] = useState("All");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 8;
   const [form, setForm] = useState<FormData>(emptyForm());
   const [newCat, setNewCat] = useState("");
   const [addingCat, setAddingCat] = useState(false);
@@ -105,13 +108,11 @@ export default function ProductsClient({ initialProducts, categories }: Props) {
             <input style={inputStyle} className="px-3 py-2 text-sm outline-none" placeholder="Product name"
               value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </div>
-
           <div className="flex flex-col gap-1">
             <label style={{ color: "var(--text-secondary)" }} className="text-xs">Price ($)</label>
             <input style={inputStyle} className="px-3 py-2 text-sm outline-none" type="number" placeholder="0.00" step="0.01"
               value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
           </div>
-
           <div className="flex flex-col gap-1">
             <label style={{ color: "var(--text-secondary)" }} className="text-xs">Category</label>
             <select style={inputStyle} className="px-3 py-2 text-sm outline-none"
@@ -119,80 +120,79 @@ export default function ProductsClient({ initialProducts, categories }: Props) {
               {categoryList.map((c) => <option key={c}>{c}</option>)}
             </select>
             <div className="flex gap-2 mt-1">
-              <input style={{ ...inputStyle, flex: 1 }} className="px-3 py-1.5 text-xs outline-none"
-                placeholder="New category..."
-                value={newCat}
-                onChange={(e) => setNewCat(e.target.value)}
+              <input style={{ ...inputStyle, flex: 1 }} className="px-3 py-1.5 text-xs outline-none" placeholder="New category..."
+                value={newCat} onChange={(e) => setNewCat(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCategory(); } }} />
               <button type="button" onClick={addCategory} disabled={addingCat || !newCat.trim()}
                 style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)", borderRadius: "8px", opacity: !newCat.trim() ? 0.4 : 1 }}
-                className="px-3 py-1.5 text-xs font-medium transition-opacity whitespace-nowrap">
-                + Add
-              </button>
+                className="px-3 py-1.5 text-xs font-medium transition-opacity whitespace-nowrap">+ Add</button>
             </div>
           </div>
-
           <div className="flex flex-col gap-1">
             <label style={{ color: "var(--text-secondary)" }} className="text-xs">Image</label>
             <div className="flex items-center gap-3">
               {preview && <img src={preview} alt="preview" className="h-10 w-10 rounded object-cover" />}
               <label style={{ border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-secondary)", cursor: "pointer" }}
                 className="px-3 py-2 text-sm hover:opacity-70 transition-opacity">
-                Upload image
-                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                Upload image<input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
               </label>
             </div>
           </div>
-
           <div className="flex flex-col gap-1 sm:col-span-2">
             <label style={{ color: "var(--text-secondary)" }} className="text-xs">Description</label>
             <textarea style={inputStyle} className="px-3 py-2 text-sm outline-none resize-none" rows={2}
               value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
-
           {error && <p className="text-red-500 text-xs sm:col-span-2">{error}</p>}
 
           <div className="sm:col-span-2 flex gap-3">
-            <button type="submit" disabled={loading}
-              style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)", borderRadius: "100px" }}
-              className="px-6 py-2.5 text-sm font-medium hover:opacity-80 transition-opacity disabled:opacity-50">
+            <button type="submit" disabled={loading} style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)", borderRadius: "100px" }} className="px-6 py-2.5 text-sm font-medium hover:opacity-80 transition-opacity disabled:opacity-50">
               {loading ? "Saving..." : editingId ? "Save Changes" : "Add Product"}
             </button>
-            {editingId && (
-              <button type="button" onClick={cancelEdit}
-                style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", borderRadius: "100px" }}
-                className="px-6 py-2.5 text-sm hover:opacity-70 transition-opacity">
-                Cancel
-              </button>
-            )}
+            {editingId && <button type="button" onClick={cancelEdit} style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", borderRadius: "100px" }} className="px-6 py-2.5 text-sm hover:opacity-70 transition-opacity">Cancel</button>}
           </div>
         </form>
       </div>
 
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {["All", ...categoryList].map((c) => (
+          <button key={c} onClick={() => { setSelectedCat(c); setPage(1); }}
+            style={{ border: "1px solid var(--border)", borderRadius: "100px", color: selectedCat === c ? "var(--bg-main)" : "var(--text-secondary)", backgroundColor: selectedCat === c ? "var(--text-primary)" : "transparent" }}
+            className="text-xs px-3 py-1.5 transition-all">{c}</button>
+        ))}
+      </div>
+
       <div style={{ backgroundColor: "var(--white)", border: "1px solid var(--border)", borderRadius: "16px", overflow: "hidden" }}>
         <div style={{ borderBottom: "1px solid var(--border)", backgroundColor: "var(--surface)" }} className="grid grid-cols-6 px-6 py-3">
-          {["Image", "Name", "Category", "Price", "", ""].map((h, i) => (
-            <p key={i} style={{ color: "var(--text-secondary)" }} className="text-xs font-semibold uppercase tracking-wide">{h}</p>
-          ))}
+          {["Image", "Name", "Category", "Price", "", ""].map((h, i) => <p key={i} style={{ color: "var(--text-secondary)" }} className="text-xs font-semibold uppercase tracking-wide">{h}</p>)}
         </div>
-        {products.map((p) => (
-          <div key={p.id} style={{ borderBottom: "1px solid var(--border)", backgroundColor: editingId === p.id ? "var(--surface)" : "transparent" }}
-            className="grid grid-cols-6 px-6 py-4 items-center transition-all">
-            <div className="h-10 w-10 rounded overflow-hidden" style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}>
-              {p.image_url ? <img src={p.image_url} alt={p.name} className="h-full w-full object-cover" />
-                : <div className="h-full w-full flex items-center justify-center text-xs">✦</div>}
-            </div>
-            <p style={{ color: "var(--text-primary)" }} className="text-sm font-medium truncate pr-2">{p.name}</p>
-            <p style={{ color: "var(--text-secondary)" }} className="text-sm">{p.category}</p>
-            <p style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">${Number(p.price).toFixed(2)}</p>
-            <button onClick={() => startEdit(p)}
-              style={{ color: "var(--text-primary)", border: "1px solid var(--border)", borderRadius: "100px", width: "fit-content" }}
-              className="text-xs px-3 py-1 hover:opacity-70 transition-opacity">Edit</button>
-            <button onClick={() => handleDelete(p.id)}
-              style={{ color: "#dc2626", border: "1px solid #fecaca", borderRadius: "100px", width: "fit-content" }}
-              className="text-xs px-3 py-1 hover:opacity-70 transition-opacity">Delete</button>
-          </div>
-        ))}
+        {(() => {
+          const filtered = selectedCat === "All" ? products : products.filter((p) => p.category === selectedCat);
+          const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+          const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+          return (<>
+            {paginated.map((p) => (
+              <div key={p.id} style={{ borderBottom: "1px solid var(--border)", backgroundColor: editingId === p.id ? "var(--surface)" : "transparent" }}
+                className="grid grid-cols-6 px-6 py-4 items-center transition-all">
+                <div className="h-10 w-10 rounded overflow-hidden" style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}>
+                  {p.image_url ? <img src={p.image_url} alt={p.name} className="h-full w-full object-cover" /> : <div className="h-full w-full flex items-center justify-center text-xs">✦</div>}
+                </div>
+                <p style={{ color: "var(--text-primary)" }} className="text-sm font-medium truncate pr-2">{p.name}</p>
+                <p style={{ color: "var(--text-secondary)" }} className="text-sm">{p.category}</p>
+                <p style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">${Number(p.price).toFixed(2)}</p>
+                <button onClick={() => startEdit(p)} style={{ color: "var(--text-primary)", border: "1px solid var(--border)", borderRadius: "100px", width: "fit-content" }} className="text-xs px-3 py-1 hover:opacity-70 transition-opacity">Edit</button>
+                <button onClick={() => handleDelete(p.id)} style={{ color: "#dc2626", border: "1px solid #fecaca", borderRadius: "100px", width: "fit-content" }} className="text-xs px-3 py-1 hover:opacity-70 transition-opacity">Delete</button>
+              </div>
+            ))}
+            {totalPages > 1 && (
+              <div className="flex gap-2 px-6 py-4 justify-center" style={{ borderTop: "1px solid var(--border)" }}>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <button key={p} onClick={() => setPage(p)} style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: page === p ? "var(--text-primary)" : "transparent", color: page === p ? "var(--bg-main)" : "var(--text-secondary)", border: `1px solid ${page === p ? "var(--text-primary)" : "var(--border)"}`, fontSize: "12px", fontWeight: page === p ? 600 : 400 }} className="transition-all hover:opacity-70">{p}</button>
+                ))}
+              </div>
+            )}
+          </>);
+        })()}
       </div>
     </div>
   );
