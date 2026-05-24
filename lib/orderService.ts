@@ -2,8 +2,15 @@ import { supabase } from "./supabase";
 import { Order } from "./types";
 import { CartItem } from "./CartContext";
 
-// Returns null if success, error message string if failed
-export async function placeOrder(userEmail: string, items: CartItem[]): Promise<string | null> {
+type PlaceResult = { orderId: string | null; error: string | null };
+
+// Returns orderId on success, error message if failed
+export async function placeOrder(
+  userEmail: string,
+  items: CartItem[],
+  address: string,
+  phone: string
+): Promise<PlaceResult> {
   const order_id = crypto.randomUUID();
 
   const rows = items.map((item) => ({
@@ -13,13 +20,15 @@ export async function placeOrder(userEmail: string, items: CartItem[]): Promise<
     image_url: item.product.image_url ?? null,
     price: item.product.price,
     quantity: item.quantity,
-    status: "pending",
+    status: "payment_pending",
+    address,
+    phone,
   }));
 
-  let { error } = await supabase.from("orders").insert(rows);
+  const { error } = await supabase.from("orders").insert(rows);
 
-  if (error) return error.message;
-  return null;
+  if (error) return { orderId: null, error: error.message };
+  return { orderId: order_id, error: null };
 }
 
 // Returns empty array if failed

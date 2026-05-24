@@ -5,11 +5,12 @@ import { supabase } from "@/lib/supabase";
 import { Order } from "@/lib/types";
 
 const STATUSES = [
-  { value: "pending",          label: "Хүлээгдэж байна",  color: "#d97706", bg: "#fef3c7" },
-  { value: "preparing",        label: "Бэлтгэж байна",     color: "#2563eb", bg: "#dbeafe" },
-  { value: "out_for_delivery", label: "Хүргэлтэнд гарсан", color: "#7c3aed", bg: "#ede9fe" },
-  { value: "delivered",        label: "Хүргэгдсэн",        color: "#16a34a", bg: "#dcfce7" },
-  { value: "cancelled",        label: "Цуцлагдсан",        color: "#dc2626", bg: "#fee2e2" },
+  { value: "payment_pending",   label: "Төлбөр хүлээгдэж байна",   color: "#d97706", bg: "#fef3c7" },
+  { value: "payment_confirmed", label: "Төлбөр баталгаажсан",       color: "#0891b2", bg: "#cffafe" },
+  { value: "preparing",         label: "Захиалга бэлтгэгдэж байна", color: "#7c3aed", bg: "#ede9fe" },
+  { value: "out_for_delivery",  label: "Хүргэлтэнд гарсан",         color: "#2563eb", bg: "#dbeafe" },
+  { value: "delivered",         label: "Хүргэгдсэн",                color: "#16a34a", bg: "#dcfce7" },
+  { value: "cancelled",         label: "Цуцлагдсан",                color: "#dc2626", bg: "#fee2e2" },
 ];
 
 const COLS = "minmax(0,2fr) minmax(0,3fr) 72px minmax(0,2fr)";
@@ -21,6 +22,8 @@ type AdminOrder = {
   total: number;
   status: string;
   created_at: string;
+  address?: string;
+  phone?: string;
 };
 
 function groupOrders(orders: Order[]): AdminOrder[] {
@@ -28,7 +31,7 @@ function groupOrders(orders: Order[]): AdminOrder[] {
   for (const row of orders) {
     const key = row.order_id ?? String(row.id);
     if (!map.has(key)) {
-      map.set(key, { order_id: key, user_email: row.user_email, items: [], total: 0, status: row.status, created_at: row.created_at });
+      map.set(key, { order_id: key, user_email: row.user_email, items: [], total: 0, status: row.status, created_at: row.created_at, address: row.address, phone: row.phone });
     }
     const g = map.get(key)!;
     g.items.push(row);
@@ -103,6 +106,8 @@ export default function AdminOrdersPage() {
                 <p style={{ color: "var(--text-secondary)" }} className="text-xs">
                   {new Date(order.created_at).toLocaleDateString()} · #{order.order_id.slice(0, 8)}
                 </p>
+                {order.phone && <p style={{ color: "var(--text-secondary)" }} className="text-xs">📞 {order.phone}</p>}
+                {order.address && <p style={{ color: "var(--text-secondary)" }} className="text-xs leading-snug">📍 {order.address}</p>}
               </div>
 
               {/* Items */}

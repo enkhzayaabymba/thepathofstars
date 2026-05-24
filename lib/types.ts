@@ -13,6 +13,7 @@ export type Product = {
   price: number;
   description: string;
   image_url: string;
+  images?: string[];
   category: string;
 };
 
@@ -33,4 +34,6 @@ export type Order = {
   quantity: number;
   status: string;
   created_at: string;
+  address?: string;
+  phone?: string;
 };

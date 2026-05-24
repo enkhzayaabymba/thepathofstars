@@ -3,11 +3,14 @@
 import { Order } from "@/lib/types";
 
 const statusStyle: Record<string, { color: string; bg: string; label: string }> = {
-  pending:          { color: "#d97706", bg: "#fef3c7", label: "Хүлээгдэж байна" },
-  preparing:        { color: "#2563eb", bg: "#dbeafe", label: "Бэлтгэж байна" },
-  out_for_delivery: { color: "#7c3aed", bg: "#ede9fe", label: "Хүргэлтэнд гарсан" },
-  delivered:        { color: "#16a34a", bg: "#dcfce7", label: "Хүргэгдсэн" },
-  cancelled:        { color: "#dc2626", bg: "#fee2e2", label: "Цуцлагдсан" },
+  payment_pending:   { color: "#d97706", bg: "#fef3c7", label: "Төлбөр хүлээгдэж байна" },
+  payment_confirmed: { color: "#0891b2", bg: "#cffafe", label: "Төлбөр баталгаажсан" },
+  preparing:         { color: "#7c3aed", bg: "#ede9fe", label: "Захиалга бэлтгэгдэж байна" },
+  out_for_delivery:  { color: "#2563eb", bg: "#dbeafe", label: "Хүргэлтэнд гарсан" },
+  delivered:         { color: "#16a34a", bg: "#dcfce7", label: "Хүргэгдсэн" },
+  cancelled:         { color: "#dc2626", bg: "#fee2e2", label: "Цуцлагдсан" },
+  // Өмнөх захиалгуудын backward compatibility
+  pending:           { color: "#d97706", bg: "#fef3c7", label: "Төлбөр хүлээгдэж байна" },
 };
 
 type GroupedOrder = {
