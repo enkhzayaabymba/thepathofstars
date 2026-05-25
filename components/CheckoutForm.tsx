@@ -63,7 +63,9 @@ export default function CheckoutForm({ loading, onSubmit, onCancel }: Props) {
       <div className="flex flex-col gap-1">
         <label style={{ color: "var(--text-secondary)" }} className="text-xs">Утасны дугаар</label>
         <input required type="tel" style={inputStyle} className="px-3 py-2 text-sm outline-none"
-          placeholder="99xxxxxx" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          placeholder="99xxxxxx" minLength={8} pattern="[0-9]{8,}"
+          title="Утасны дугаар хамгийн багадаа 8 орон байх ёстой"
+          value={phone} onChange={(e) => setPhone(e.target.value)} />
       </div>
 
       <button type="submit" disabled={loading}
