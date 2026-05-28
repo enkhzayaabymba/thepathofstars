@@ -38,7 +38,7 @@ export default function HeroSection() {
           style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
           className="px-7 py-3 rounded-full text-sm font-medium hover:opacity-70 transition-opacity"
         >
-          Browse Shop
+          Go to Shop
         </Link>
       </div>
     </section>

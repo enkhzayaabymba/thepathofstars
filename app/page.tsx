@@ -44,15 +44,6 @@ export default async function HomePage() {
             ))}
           </div>
 
-          <div className="flex justify-center mt-12">
-            <Link
-              href="/reading"
-              style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)" }}
-              className="px-8 py-4 rounded-full text-sm font-medium hover:opacity-80 transition-opacity"
-            >
-              Start a Reading →
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -62,13 +53,6 @@ export default async function HomePage() {
           <h2 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold">
             Featured Products
           </h2>
-          <Link
-            href="/shop"
-            style={{ color: "var(--text-secondary)", border: "1px solid var(--border)" }}
-            className="text-sm px-5 py-2 rounded-full hover:opacity-70 transition-opacity"
-          >
-            Go to Shop →
-          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

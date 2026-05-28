@@ -5,7 +5,6 @@ import NavAuth from "@/components/NavAuth";
 import CartButton from "@/components/CartButton";
 
 const links = [
-  { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/reading", label: "Reading" },
 ];
