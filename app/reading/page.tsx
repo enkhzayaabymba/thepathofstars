@@ -4,27 +4,7 @@ import { useState } from "react";
 import { ReadingType } from "@/lib/types";
 import { drawCards, DrawnCard } from "@/lib/tarot/drawCards";
 import ReadingResult from "@/components/ReadingResult";
-
-const OPTIONS = [
-  {
-    type: "one-card" as ReadingType,
-    label: "Нэг карт",
-    desc: "Нэг асуулт, нэг хариулт — товч, гүн уншлага.",
-    cards: 1,
-  },
-  {
-    type: "three-card" as ReadingType,
-    label: "Гурван карт",
-    desc: "Өнгөрсөн · Одоо · Ирээдүй — цогц харагдац.",
-    cards: 3,
-  },
-  {
-    type: "celtic-cross" as ReadingType,
-    label: "Celtic Cross",
-    desc: "10 картын гүнзгий уншлага — нарийн нөхцөл байдалд.",
-    cards: 10,
-  },
-];
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function ReadingPage() {
   const [type, setType] = useState<ReadingType>("one-card");
@@ -32,6 +12,13 @@ export default function ReadingPage() {
   const [cards, setCards] = useState<DrawnCard[] | null>(null);
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
+
+  const OPTIONS = [
+    { type: "one-card" as ReadingType, label: t.one_card, desc: t.one_card_desc, cards: 1 },
+    { type: "three-card" as ReadingType, label: t.three_card, desc: t.three_card_desc, cards: 3 },
+    { type: "celtic-cross" as ReadingType, label: t.celtic_cross, desc: t.celtic_cross_desc, cards: 10 },
+  ];
 
   const selected = OPTIONS.find((o) => o.type === type)!;
 
@@ -83,16 +70,19 @@ export default function ReadingPage() {
     );
   }
 
+  const drawLabel = selected.cards === 1
+    ? t.draw_card.replace("{n}", "1")
+    : t.draw_cards.replace("{n}", String(selected.cards));
+
   return (
     <main className="max-w-190 mx-auto px-4 md:px-10 py-12 md:py-16">
       <h1 style={{ color: "var(--text-primary)" }} className="text-2xl md:text-4xl font-bold mb-3">
-        Таны уншлага
+        {t.reading_title}
       </h1>
       <p style={{ color: "var(--text-secondary)" }} className="text-base mb-10">
-        Тархалт сонгоод, зорилгоо тавиад, картаа татна уу.
+        {t.reading_sub}
       </p>
 
-      {/* Spread options */}
       <div className="flex flex-col gap-3 mb-8">
         {OPTIONS.map((opt) => (
           <button
@@ -107,32 +97,22 @@ export default function ReadingPage() {
             }}
             className="transition-all"
           >
-            <p style={{ color: "var(--text-primary)" }} className="font-semibold text-sm">
-              {opt.label}
-            </p>
-            <p style={{ color: "var(--text-secondary)" }} className="text-xs mt-1">
-              {opt.desc}
-            </p>
+            <p style={{ color: "var(--text-primary)" }} className="font-semibold text-sm">{opt.label}</p>
+            <p style={{ color: "var(--text-secondary)" }} className="text-xs mt-1">{opt.desc}</p>
           </button>
         ))}
       </div>
 
-      {/* Question */}
       <div className="mb-8">
         <label style={{ color: "var(--text-secondary)" }} className="text-xs mb-2 block">
-          Таны асуулт эсвэл зорилго (заавал биш)
+          {t.question_label}
         </label>
         <textarea
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Юу мэдэх хэрэгтэй вэ..."
+          placeholder={t.question_placeholder}
           rows={3}
-          style={{
-            border: "1px solid var(--border)",
-            borderRadius: "8px",
-            color: "var(--text-primary)",
-            backgroundColor: "var(--white)",
-          }}
+          style={{ border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)", backgroundColor: "var(--white)" }}
           className="w-full px-4 py-3 text-sm outline-none resize-none focus:ring-1 focus:ring-[#3A3828]"
         />
       </div>
@@ -142,7 +122,7 @@ export default function ReadingPage() {
         style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)" }}
         className="w-full py-4 rounded-full text-sm font-medium hover:opacity-80 transition-opacity"
       >
-        {selected.cards} карт татах — уншлага эхлэх
+        {drawLabel}
       </button>
     </main>
   );

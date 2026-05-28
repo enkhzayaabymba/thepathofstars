@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { getMyOrders } from "@/lib/orderService";
 import { Order } from "@/lib/types";
 import OrderCard, { GroupedOrder } from "@/components/OrderCard";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const PAGE_SIZE = 5;
 const POLL_INTERVAL = 15000;
@@ -30,6 +31,7 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const { t } = useLanguage();
 
   const fetchOrders = useCallback(async (userEmail: string) => {
     const orders = await getMyOrders(userEmail);
@@ -50,14 +52,11 @@ export default function MyOrdersPage() {
 
   useEffect(() => {
     if (!email) return;
-
     const interval = setInterval(() => fetchOrders(email), POLL_INTERVAL);
-
     function onVisible() {
       if (document.visibilityState === "visible") fetchOrders(email!);
     }
     document.addEventListener("visibilitychange", onVisible);
-
     return () => {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
@@ -70,16 +69,16 @@ export default function MyOrdersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p style={{ color: "var(--text-secondary)" }} className="text-sm">Loading your orders...</p>
+        <p style={{ color: "var(--text-secondary)" }} className="text-sm">{t.orders_loading}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
-      <h1 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold mb-2">My Orders</h1>
+      <h1 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold mb-2">{t.orders_title}</h1>
       <p style={{ color: "var(--text-secondary)" }} className="text-sm mb-10">
-        {grouped.length === 0 ? "You have no orders yet." : `${grouped.length} orders`}
+        {grouped.length === 0 ? t.orders_empty : t.orders_count.replace("{n}", String(grouped.length))}
       </p>
 
       <div className="flex flex-col gap-4">

@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/lib/LanguageContext";
+
 type Props = {
   name: string;
   description: string;
@@ -10,6 +12,7 @@ type Props = {
 };
 
 export default function TarotCard({ name, description, imageUrl, price, onClick }: Props) {
+  const { t } = useLanguage();
   return (
     <div
       style={{
@@ -72,7 +75,7 @@ export default function TarotCard({ name, description, imageUrl, price, onClick 
               transition-all duration-300 hover:scale-105 hover:shadow-lg"
             onClick={(e) => { e.stopPropagation(); onClick?.(); }}
           >
-            Add to Cart
+            {t.add_to_cart}
           </button>
         </div>
       )}

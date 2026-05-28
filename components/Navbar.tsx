@@ -4,14 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import NavAuth from "@/components/NavAuth";
 import CartButton from "@/components/CartButton";
-
-const links = [
-  { href: "/shop", label: "Shop" },
-  { href: "/reading", label: "Reading" },
-];
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { t } = useLanguage();
+
+  const links = [
+    { href: "/shop", label: t.nav_shop },
+    { href: "/reading", label: t.nav_reading },
+  ];
 
   return (
     <header
@@ -35,6 +37,7 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+
           <CartButton />
           <NavAuth />
         </nav>
