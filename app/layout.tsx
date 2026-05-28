@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex-1">{children}</div>
 
           <footer style={{ borderTop: "1px solid var(--border)" }} className="py-8 mt-16">
-            <div className="max-w-300 mx-auto px-10 flex items-center justify-between">
+            <div className="max-w-300 mx-auto px-4 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-2">
               <span style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">
                 ✦ The Path of Stars
               </span>

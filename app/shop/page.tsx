@@ -16,9 +16,9 @@ export default async function ShopPage() {
   const [products, categories] = await Promise.all([getProducts(), getCategories()]);
 
   return (
-    <main className="max-w-300 mx-auto px-10 py-16">
+    <main className="max-w-300 mx-auto px-4 md:px-10 py-12 md:py-16">
       <div className="mb-10">
-        <h1 style={{ color: "var(--text-primary)" }} className="text-4xl font-bold mb-3">
+        <h1 style={{ color: "var(--text-primary)" }} className="text-3xl md:text-4xl font-bold mb-3">
           Shop
         </h1>
         <p style={{ color: "var(--text-secondary)" }} className="text-base">

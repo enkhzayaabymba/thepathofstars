@@ -64,7 +64,7 @@ export default function ReadingResult({ cards, readingType, reading, loading, on
   const isThree = readingType === "three-card";
 
   return (
-    <main className="max-w-190 mx-auto px-10 py-16">
+    <main className="max-w-190 mx-auto px-4 md:px-10 py-12 md:py-16">
       <div className="flex items-center justify-between mb-8">
         <h1 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold">Таны уншлага</h1>
         <button
@@ -80,7 +80,7 @@ export default function ReadingResult({ cards, readingType, reading, loading, on
       <div
         className={
           isCeltic
-            ? "grid grid-cols-3 sm:grid-cols-5 gap-3 mb-10"
+            ? "grid grid-cols-2 sm:grid-cols-5 gap-3 mb-10"
             : isThree
             ? "grid grid-cols-3 gap-4 mb-10"
             : "flex justify-center mb-10"
@@ -95,11 +95,11 @@ export default function ReadingResult({ cards, readingType, reading, loading, on
 
       {/* Reading text */}
       <div
+        className="p-5 sm:p-8"
         style={{
           backgroundColor: "var(--surface)",
           border: "1px solid var(--border)",
           borderRadius: "16px",
-          padding: "32px",
           minHeight: "120px",
         }}
       >

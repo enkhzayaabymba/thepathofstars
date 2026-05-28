@@ -84,8 +84,8 @@ export default function ReadingPage() {
   }
 
   return (
-    <main className="max-w-190 mx-auto px-10 py-16">
-      <h1 style={{ color: "var(--text-primary)" }} className="text-4xl font-bold mb-3">
+    <main className="max-w-190 mx-auto px-4 md:px-10 py-12 md:py-16">
+      <h1 style={{ color: "var(--text-primary)" }} className="text-2xl md:text-4xl font-bold mb-3">
         Таны уншлага
       </h1>
       <p style={{ color: "var(--text-secondary)" }} className="text-base mb-10">

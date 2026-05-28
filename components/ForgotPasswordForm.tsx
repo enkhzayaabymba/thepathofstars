@@ -12,14 +12,20 @@ export default function ForgotPasswordForm({ onBack }: Props) {
   const [resetEmail, setResetEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleReset() {
     if (!isValidEmail(resetEmail)) return;
     setLoading(true);
-    await supabase.auth.resetPasswordForEmail(resetEmail, {
+    setError("");
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
-    setResetSent(true);
+    if (error) {
+      setError(error.message);
+    } else {
+      setResetSent(true);
+    }
     setLoading(false);
   }
 
@@ -57,6 +63,7 @@ export default function ForgotPasswordForm({ onBack }: Props) {
         </p>
       ) : (
         <div className="flex flex-col gap-3">
+          {error && <p className="text-red-500 text-xs">{error}</p>}
           <input
             type="email"
             placeholder="Your email"

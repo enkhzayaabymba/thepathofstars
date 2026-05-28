@@ -39,7 +39,7 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
       )}
 
       <div className="fixed top-0 right-0 h-full z-50 flex flex-col transition-transform duration-300"
-        style={{ width: "380px", backgroundColor: "var(--bg-main)", borderLeft: "1px solid var(--border)", transform: isOpen ? "translateX(0)" : "translateX(100%)" }}>
+        style={{ width: "min(380px, 100vw)", backgroundColor: "var(--bg-main)", borderLeft: "1px solid var(--border)", transform: isOpen ? "translateX(0)" : "translateX(100%)" }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: "1px solid var(--border)" }}>

@@ -26,8 +26,8 @@ export default async function HomePage() {
         style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}
         className="py-20"
       >
-        <div className="max-w-300 mx-auto px-10">
-          <h2 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold text-center mb-12">
+        <div className="max-w-300 mx-auto px-4 md:px-10">
+          <h2 style={{ color: "var(--text-primary)" }} className="text-2xl md:text-3xl font-bold text-center mb-12">
             How it works
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -48,14 +48,14 @@ export default async function HomePage() {
       </section>
 
       {/* Featured cards */}
-      <section className="max-w-300 mx-auto px-10 py-20">
+      <section className="max-w-300 mx-auto px-4 md:px-10 py-14 md:py-20">
         <div className="flex items-center justify-between mb-10">
-          <h2 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold">
+          <h2 style={{ color: "var(--text-primary)" }} className="text-2xl md:text-3xl font-bold">
             Featured Products
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {featuredProducts.map((product) => (
             <Link key={product.id} href="/shop">
               <TarotCard

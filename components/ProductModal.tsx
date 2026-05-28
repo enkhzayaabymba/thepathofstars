@@ -45,9 +45,9 @@ export default function ProductModal({ product, onClose, onAddToCart }: Props) {
         </div>
 
         {/* Info */}
-        <div className="flex flex-col gap-4 p-8 overflow-y-auto">
+        <div className="flex flex-col gap-4 p-4 sm:p-8 overflow-y-auto">
           <span style={{ backgroundColor: "var(--surface)", color: "var(--text-secondary)", borderRadius: "100px", border: "1px solid var(--border)" }} className="text-xs px-3 py-1 w-fit">{product.category}</span>
-          <h2 style={{ color: "var(--text-primary)" }} className="text-2xl font-bold">{product.name}</h2>
+          <h2 style={{ color: "var(--text-primary)" }} className="text-xl sm:text-2xl font-bold">{product.name}</h2>
           <p style={{ color: "var(--text-secondary)" }} className="text-sm leading-relaxed">{product.description}</p>
           <p style={{ color: "var(--text-primary)" }} className="text-2xl font-bold mt-auto">${product.price.toFixed(2)}</p>
 

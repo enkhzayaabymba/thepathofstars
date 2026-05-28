@@ -5,9 +5,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+type Props = {
+  isOpen: boolean;
+  onToggle: () => void;
+};
+
 const LAST_VIEWED_KEY = "admin_orders_last_viewed";
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ isOpen, onToggle }: Props) {
   const pathname = usePathname();
   const [newOrders, setNewOrders] = useState(0);
 
@@ -25,7 +30,6 @@ export default function AdminSidebar() {
 
     checkNew();
     const interval = setInterval(checkNew, 10000);
-
     window.addEventListener("orders-seen", checkNew);
     return () => {
       clearInterval(interval);
@@ -39,14 +43,21 @@ export default function AdminSidebar() {
     { href: "/admin/orders", label: "Orders", icon: "✦", badge: newOrders },
   ];
 
-  return (
-    <aside
-      style={{ borderRight: "1px solid var(--border)", backgroundColor: "var(--surface)", minHeight: "100vh", width: "220px" }}
-      className="flex flex-col shrink-0"
-    >
-      <div style={{ borderBottom: "1px solid var(--border)" }} className="px-6 py-5">
-        <p style={{ color: "var(--text-primary)" }} className="font-bold text-sm">✦ Path of Stars</p>
-        <p style={{ color: "var(--text-secondary)" }} className="text-xs mt-0.5">Admin Panel</p>
+  const sidebarContent = (
+    <>
+      <div style={{ borderBottom: "1px solid var(--border)" }} className="px-6 py-5 flex items-center justify-between">
+        <div>
+          <p style={{ color: "var(--text-primary)" }} className="font-bold text-sm">✦ Path of Stars</p>
+          <p style={{ color: "var(--text-secondary)" }} className="text-xs mt-0.5">Admin Panel</p>
+        </div>
+        <button
+          onClick={onToggle}
+          style={{ color: "var(--text-secondary)" }}
+          className="text-base hover:opacity-70 transition-opacity md:flex hidden"
+          aria-label="Close sidebar"
+        >
+          ✕
+        </button>
       </div>
 
       <nav className="flex flex-col gap-1 p-4 flex-1">
@@ -95,6 +106,35 @@ export default function AdminSidebar() {
           ← Back to site
         </Link>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile: fixed overlay drawer */}
+      <aside
+        className="fixed top-0 left-0 h-full z-50 flex flex-col md:hidden transition-transform duration-300"
+        style={{
+          width: "220px",
+          borderRight: "1px solid var(--border)",
+          backgroundColor: "var(--surface)",
+          transform: isOpen ? "translateX(0)" : "translateX(-100%)",
+        }}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Desktop: inline collapsible */}
+      <aside
+        className="hidden md:flex flex-col shrink-0 transition-all duration-300 overflow-hidden"
+        style={{
+          width: isOpen ? "220px" : "0px",
+          borderRight: isOpen ? "1px solid var(--border)" : "none",
+          backgroundColor: "var(--surface)",
+        }}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 }
