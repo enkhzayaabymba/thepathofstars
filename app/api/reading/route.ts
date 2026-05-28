@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { buildOneCardPrompt, buildThreeCardPrompt, buildTenCardPrompt, SYSTEM } from "@/lib/tarot/prompts";
+import { buildOneCardPrompt, buildThreeCardPrompt, buildTenCardPrompt, SYSTEM, SYSTEM_TEN } from "@/lib/tarot/prompts";
 import { DrawnCard } from "@/lib/tarot/drawCards";
 import { ReadingType } from "@/lib/types";
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   const stream = client.messages.stream({
     model: "claude-sonnet-4-6",
     max_tokens: 1500,
-    system: SYSTEM,
+    system: type === "celtic-cross" ? SYSTEM_TEN : SYSTEM,
     messages: [{ role: "user", content: prompt }],
   });
 
