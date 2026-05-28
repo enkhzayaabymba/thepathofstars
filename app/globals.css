@@ -9,6 +9,15 @@
   --white: #FFFFFF;
 }
 
+[data-theme="dark"] {
+  --bg-main: #1C1B10;
+  --text-primary: #F0EDD0;
+  --text-secondary: #A8A48E;
+  --border: #2E2C1C;
+  --surface: #242316;
+  --white: #1E1D12;
+}
+
 body {
   background-color: var(--bg-main);
   color: var(--text-primary);

@@ -15,11 +15,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const email = data.session?.user?.email;
-      if (!email || email !== ADMIN_EMAIL) {
-        router.push("/");
-      } else {
-        setChecking(false);
-      }
+      if (!email || email !== ADMIN_EMAIL) router.push("/");
+      else setChecking(false);
     });
   }, [router]);
 
@@ -33,26 +30,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div style={{ backgroundColor: "var(--bg-main)" }} className="flex min-h-screen">
-      {/* Mobile backdrop */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 md:hidden"
-          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 z-40 md:hidden" style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+          onClick={() => setSidebarOpen(false)} />
       )}
 
-      <AdminSidebar isOpen={sidebarOpen} />
+      <AdminSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
 
       <main className="flex-1 overflow-auto min-w-0">
-        {/* Top bar with toggle */}
-        <div className="flex items-center px-4 pt-4">
-          <button
-            onClick={() => setSidebarOpen((v) => !v)}
-            style={{ color: "var(--text-primary)" }}
-            className="hover:opacity-70 transition-opacity"
-            aria-label="Toggle sidebar"
-          >
+        {/* Mobile-only top bar */}
+        <div className="md:hidden flex items-center px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
+          <button onClick={() => setSidebarOpen(true)} style={{ color: "var(--text-primary)" }}
+            className="hover:opacity-70 transition-opacity">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <rect x="2" y="2" width="14" height="14" rx="2"/>
               <line x1="7" y1="2" x2="7" y2="16"/>
