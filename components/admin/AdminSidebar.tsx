@@ -7,12 +7,11 @@ import { supabase } from "@/lib/supabase";
 
 type Props = {
   isOpen: boolean;
-  onToggle: () => void;
 };
 
 const LAST_VIEWED_KEY = "admin_orders_last_viewed";
 
-export default function AdminSidebar({ isOpen, onToggle }: Props) {
+export default function AdminSidebar({ isOpen }: Props) {
   const pathname = usePathname();
   const [newOrders, setNewOrders] = useState(0);
 
@@ -50,14 +49,6 @@ export default function AdminSidebar({ isOpen, onToggle }: Props) {
           <p style={{ color: "var(--text-primary)" }} className="font-bold text-sm">✦ Path of Stars</p>
           <p style={{ color: "var(--text-secondary)" }} className="text-xs mt-0.5">Admin Panel</p>
         </div>
-        <button
-          onClick={onToggle}
-          style={{ color: "var(--text-secondary)" }}
-          className="text-base hover:opacity-70 transition-opacity md:flex hidden"
-          aria-label="Close sidebar"
-        >
-          ✕
-        </button>
       </div>
 
       <nav className="flex flex-col gap-1 p-4 flex-1">

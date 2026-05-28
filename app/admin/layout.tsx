@@ -42,26 +42,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
 
-      <AdminSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
+      <AdminSidebar isOpen={sidebarOpen} />
 
       <main className="flex-1 overflow-auto min-w-0">
         {/* Top bar with toggle */}
-        <div
-          className="flex items-center gap-3 px-4 h-12 sticky top-0 z-30"
-          style={{ borderBottom: "1px solid var(--border)", backgroundColor: "var(--bg-main)" }}
-        >
+        <div className="flex items-center px-4 pt-4">
           <button
             onClick={() => setSidebarOpen((v) => !v)}
             style={{ color: "var(--text-primary)" }}
-            className="text-lg hover:opacity-70 transition-opacity"
+            className="hover:opacity-70 transition-opacity"
             aria-label="Toggle sidebar"
           >
-            ☰
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <rect x="2" y="2" width="14" height="14" rx="2"/>
+              <line x1="7" y1="2" x2="7" y2="16"/>
+            </svg>
           </button>
-          <p style={{ color: "var(--text-secondary)" }} className="text-xs font-medium">Admin Panel</p>
         </div>
 
-        <div className="p-4 md:p-10">{children}</div>
+        <div className="p-4 md:p-10 max-w-5xl mx-auto w-full">{children}</div>
       </main>
     </div>
   );

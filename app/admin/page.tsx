@@ -17,7 +17,7 @@ export default async function AdminDashboard() {
   const { totalOrders, totalRevenue, pendingOrders, totalProducts } = await getStats();
 
   return (
-    <div className="max-w-5xl">
+    <div>
       {/* Header */}
       <div className="mb-10">
         <h1 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold mb-1">

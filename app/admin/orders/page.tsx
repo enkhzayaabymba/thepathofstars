@@ -77,7 +77,7 @@ export default function AdminOrdersPage() {
   if (loading) return <p style={{ color: "var(--text-secondary)" }} className="text-sm">Loading...</p>;
 
   return (
-    <div className="max-w-5xl">
+    <div>
       <div className="mb-10">
         <h1 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold mb-1">Orders</h1>
         <p style={{ color: "var(--text-secondary)" }} className="text-sm">{orders.length} total orders</p>
