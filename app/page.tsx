@@ -55,7 +55,7 @@ export default async function HomePage() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {featuredProducts.map((product) => (
             <Link key={product.id} href="/shop">
               <TarotCard

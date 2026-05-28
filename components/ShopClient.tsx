@@ -49,7 +49,7 @@ export default function ShopClient({ products, categories }: Props) {
           No products found.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {filtered.map((product) => (
             <TarotCard
               key={product.id}
