@@ -1,6 +1,8 @@
 import HeroSection from "@/components/HeroSection";
 import TarotCard from "@/components/TarotCard";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { Product } from "@/lib/types";
 
 const features = [
   { icon: "✦", title: "Daily Card", desc: "Pull a card each morning to set your intention for the day." },
@@ -8,13 +10,13 @@ const features = [
   { icon: "◉", title: "Curated Decks", desc: "Shop beautifully illustrated tarot and oracle decks." },
 ];
 
-const previewCards = [
-  { name: "The Fool", description: "New beginnings, spontaneity, and a free spirit ready to leap into the unknown." },
-  { name: "The Star", description: "Hope, renewal, and calm inspiration after a period of struggle." },
-  { name: "The Moon", description: "Intuition, dreams, and the unconscious mind revealing hidden truths." },
-];
+async function getFeaturedProducts(): Promise<Product[]> {
+  const { data } = await supabase.from("products").select("*").limit(3);
+  return (data as Product[]) ?? [];
+}
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featuredProducts = await getFeaturedProducts();
   return (
     <main>
       <HeroSection />
@@ -41,6 +43,16 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+
+          <div className="flex justify-center mt-12">
+            <Link
+              href="/reading"
+              style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)" }}
+              className="px-8 py-4 rounded-full text-sm font-medium hover:opacity-80 transition-opacity"
+            >
+              Start a Reading →
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -48,20 +60,27 @@ export default function HomePage() {
       <section className="max-w-300 mx-auto px-10 py-20">
         <div className="flex items-center justify-between mb-10">
           <h2 style={{ color: "var(--text-primary)" }} className="text-3xl font-bold">
-            Featured Cards
+            Featured Products
           </h2>
           <Link
-            href="/reading"
+            href="/shop"
             style={{ color: "var(--text-secondary)", border: "1px solid var(--border)" }}
             className="text-sm px-5 py-2 rounded-full hover:opacity-70 transition-opacity"
           >
-            Start a Reading →
+            Go to Shop →
           </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {previewCards.map((card) => (
-            <TarotCard key={card.name} name={card.name} description={card.description} />
+          {featuredProducts.map((product) => (
+            <Link key={product.id} href="/shop">
+              <TarotCard
+                name={product.name}
+                description={product.description}
+                imageUrl={product.image_url}
+                price={product.price}
+              />
+            </Link>
           ))}
         </div>
       </section>
