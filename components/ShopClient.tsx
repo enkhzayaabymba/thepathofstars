@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import TarotCard from "@/components/TarotCard";
 import ProductModal from "@/components/ProductModal";
 import { Product, Category } from "@/lib/types";
 import { useCart } from "@/lib/CartContext";
 import { useLanguage } from "@/lib/LanguageContext";
+import { supabase } from "@/lib/supabase";
 
 type Props = {
   products: Product[];
@@ -15,8 +17,21 @@ type Props = {
 export default function ShopClient({ products, categories }: Props) {
   const [selected, setSelected] = useState("all");
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
+  const [loggedIn, setLoggedIn] = useState(false);
   const { addItem } = useCart();
   const { t } = useLanguage();
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setLoggedIn(!!data.session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setLoggedIn(!!s));
+    return () => subscription.unsubscribe();
+  }, []);
+
+  function handleAddToCart(product: Product, quantity: number) {
+    if (!loggedIn) { router.push("/login"); return; }
+    addItem(product, quantity);
+  }
 
   const allLabel = t.nav_shop === "Shop" ? "All" : "Бүгд";
   const allCategories = [{ value: "all", label: allLabel }, ...categories.map((c) => ({ value: c.name, label: c.name }))];
@@ -66,7 +81,7 @@ export default function ShopClient({ products, categories }: Props) {
               imageUrl={product.image_url || undefined}
               price={product.price}
               onClick={() => setActiveProduct(product)}
-              onAddToCart={(quantity) => addItem(product, quantity)}
+              onAddToCart={(quantity) => handleAddToCart(product, quantity)}
             />
           ))}
         </div>
@@ -77,7 +92,7 @@ export default function ShopClient({ products, categories }: Props) {
           product={activeProduct}
           onClose={() => setActiveProduct(null)}
           onAddToCart={(quantity) => {
-            addItem(activeProduct, quantity);
+            handleAddToCart(activeProduct, quantity);
             setActiveProduct(null);
           }}
         />
