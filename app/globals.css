@@ -10,12 +10,12 @@
 }
 
 [data-theme="dark"] {
-  --bg-main: #1C1B10;
-  --text-primary: #F0EDD0;
-  --text-secondary: #A8A48E;
-  --border: #2E2C1C;
-  --surface: #242316;
-  --white: #1E1D12;
+  --bg-main: #1a1916;
+  --text-primary: #e8e8e4;
+  --text-secondary: #9b9b9b;
+  --border: #2e2c24;
+  --surface: #21201a;
+  --white: #2a2820;
 }
 
 body {
