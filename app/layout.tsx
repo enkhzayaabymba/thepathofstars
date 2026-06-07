@@ -10,7 +10,18 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "The Path of Stars — Tarot Readings & Decks",
-  description: "Discover the wisdom hidden in the stars. Tarot readings, curated decks, and cosmic guidance.",
+  description: "Discover the wisdom hidden in the stars. Tarot readings, curated decks, and cosmic guidance — one card at a time.",
+  keywords: ["tarot", "tarot reading", "tarot decks", "oracle cards", "cosmic guidance", "тарот", "уншлага"],
+  openGraph: {
+    title: "The Path of Stars — Tarot Readings & Decks",
+    description: "Discover the wisdom hidden in the stars. Tarot readings, curated decks, and cosmic guidance.",
+    url: "https://thepathsofstars.com",
+    siteName: "The Path of Stars",
+    type: "website",
+  },
+  verification: {
+    google: "ehYFUokbCEtCIDXiadCcjbQ_aQukVxtqiv5l8WxQ7ak",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
