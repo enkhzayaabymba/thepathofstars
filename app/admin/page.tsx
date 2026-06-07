@@ -30,7 +30,7 @@ export default async function AdminDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
-        <StatsCard label="Total Revenue" value={`$${totalRevenue.toFixed(2)}`} icon="💰" sub="All time" />
+        <StatsCard label="Total Revenue" value={`₮${totalRevenue.toLocaleString()}`} icon="💰" sub="All time" />
         <StatsCard label="Total Orders" value={totalOrders} icon="📦" sub="All time" />
         <StatsCard label="Pending Orders" value={pendingOrders} icon="⏳" sub="Needs attention" />
         <StatsCard label="Products" value={totalProducts} icon="🃏" sub="In store" />

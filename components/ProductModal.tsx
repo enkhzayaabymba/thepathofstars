@@ -49,7 +49,7 @@ export default function ProductModal({ product, onClose, onAddToCart }: Props) {
           <span style={{ backgroundColor: "var(--surface)", color: "var(--text-secondary)", borderRadius: "100px", border: "1px solid var(--border)" }} className="text-xs px-3 py-1 w-fit">{product.category}</span>
           <h2 style={{ color: "var(--text-primary)" }} className="text-xl sm:text-2xl font-bold">{product.name}</h2>
           <p style={{ color: "var(--text-secondary)" }} className="text-sm leading-relaxed">{product.description}</p>
-          <p style={{ color: "var(--text-primary)" }} className="text-2xl font-bold mt-auto">${product.price.toFixed(2)}</p>
+          <p style={{ color: "var(--text-primary)" }} className="text-2xl font-bold mt-auto">₮{product.price.toLocaleString()}</p>
 
           <div className="flex items-center gap-4">
             <button onClick={() => setQty((q) => Math.max(1, q - 1))} style={{ border: "1px solid var(--border)", color: "var(--text-primary)", borderRadius: "50%", width: "36px", height: "36px" }} className="flex items-center justify-center text-lg hover:opacity-60 transition-opacity shrink-0">−</button>
@@ -57,7 +57,7 @@ export default function ProductModal({ product, onClose, onAddToCart }: Props) {
             <button onClick={() => setQty((q) => Math.min(99, q + 1))} style={{ border: "1px solid var(--border)", color: "var(--text-primary)", borderRadius: "50%", width: "36px", height: "36px" }} className="flex items-center justify-center text-lg hover:opacity-60 transition-opacity shrink-0">+</button>
           </div>
           <button onClick={handleAdd} style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)", borderRadius: "100px" }} className="w-full py-3 text-sm font-semibold hover:opacity-80 transition-opacity">
-            Add {qty} to Cart — ${(product.price * qty).toFixed(2)}
+            Add {qty} to Cart — ₮{(product.price * qty).toLocaleString()}
           </button>
         </div>
       </div>

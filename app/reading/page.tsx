@@ -17,7 +17,6 @@ export default function ReadingPage() {
   const OPTIONS = [
     { type: "one-card" as ReadingType, label: t.one_card, desc: t.one_card_desc, cards: 1 },
     { type: "three-card" as ReadingType, label: t.three_card, desc: t.three_card_desc, cards: 3 },
-    { type: "celtic-cross" as ReadingType, label: t.celtic_cross, desc: t.celtic_cross_desc, cards: 10 },
   ];
 
   const selected = OPTIONS.find((o) => o.type === type)!;

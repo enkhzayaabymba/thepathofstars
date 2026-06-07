@@ -43,12 +43,10 @@ function CardChip({ card, label }: { card: DrawnCard; label?: string }) {
 
 export default function ReadingResult({ cards, readingType, reading, loading, onReset }: Props) {
   const { t } = useLanguage();
-  const isCeltic = readingType === "celtic-cross";
   const isThree = readingType === "three-card";
 
   function getLabel(i: number) {
     if (isThree) return t.three_labels[i];
-    if (isCeltic) return t.celtic_labels[i];
     return undefined;
   }
 
@@ -65,17 +63,9 @@ export default function ReadingResult({ cards, readingType, reading, loading, on
         </button>
       </div>
 
-      <div
-        className={
-          isCeltic
-            ? "grid grid-cols-2 sm:grid-cols-5 gap-3 mb-10"
-            : isThree
-            ? "grid grid-cols-3 gap-4 mb-10"
-            : "flex justify-center mb-10"
-        }
-      >
+      <div className={isThree ? "grid grid-cols-3 gap-4 mb-10" : "flex justify-center mb-10"}>
         {cards.map((card, i) => (
-          <div key={i} className={!isCeltic && !isThree ? "w-48" : ""}>
+          <div key={i} className={!isThree ? "w-48" : ""}>
             <CardChip card={card} label={getLabel(i)} />
           </div>
         ))}

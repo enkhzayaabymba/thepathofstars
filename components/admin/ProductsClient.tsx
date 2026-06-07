@@ -85,7 +85,7 @@ export default function ProductsClient({ initialProducts, categories }: Props) {
             <input style={inputStyle} className="px-3 py-2 text-sm outline-none" placeholder="Product name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </div>
           <div className="flex flex-col gap-1">
-            <label style={{ color: "var(--text-secondary)" }} className="text-xs">Price ($)</label>
+            <label style={{ color: "var(--text-secondary)" }} className="text-xs">Үнэ (₮)</label>
             <input style={inputStyle} className="px-3 py-2 text-sm outline-none" type="number" placeholder="0.00" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
           </div>
           <div className="flex flex-col gap-1">
@@ -147,7 +147,7 @@ export default function ProductsClient({ initialProducts, categories }: Props) {
                 </div>
                 <p style={{ color: "var(--text-primary)" }} className="text-sm font-medium truncate pr-2">{p.name}</p>
                 <p style={{ color: "var(--text-secondary)" }} className="text-sm">{p.category}</p>
-                <p style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">${Number(p.price).toFixed(2)}</p>
+                <p style={{ color: "var(--text-primary)" }} className="text-sm font-semibold">₮{Number(p.price).toLocaleString()}</p>
                 <button onClick={() => startEdit(p)} style={{ color: "var(--text-primary)", border: "1px solid var(--border)", borderRadius: "100px", width: "fit-content" }} className="text-xs px-3 py-1 hover:opacity-70 transition-opacity">Edit</button>
                 <button onClick={() => handleDelete(p.id)} style={{ color: "#dc2626", border: "1px solid #fecaca", borderRadius: "100px", width: "fit-content" }} className="text-xs px-3 py-1 hover:opacity-70 transition-opacity">Delete</button>
               </div>
