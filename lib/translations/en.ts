@@ -116,6 +116,8 @@ const en = {
   err_email: "Please enter a valid email address.",
   err_pass_short: "Password must be at least 8 characters.",
   err_pass_match: "Passwords do not match.",
+  free_reading_used: "You've used your free reading. Sign in to unlock unlimited readings.",
+  free_reading_signin: "Sign In",
 };
 
 export default en;

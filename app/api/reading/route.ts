@@ -3,17 +3,10 @@ import { NextRequest } from "next/server";
 import { buildOneCardPrompt, buildThreeCardPrompt, SYSTEM } from "@/lib/tarot/prompts";
 import { DrawnCard } from "@/lib/tarot/drawCards";
 import { ReadingType } from "@/lib/types";
-import { getAuthUser } from "@/lib/serverAuth";
 
 const client = new Anthropic();
 
 export async function POST(request: NextRequest) {
-  // Rule 2: Check 1 — must be logged in
-  const user = await getAuthUser(request);
-  if (!user) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
   const { cards, question, type }: { cards: DrawnCard[]; question: string; type: ReadingType } =
     await request.json();
 

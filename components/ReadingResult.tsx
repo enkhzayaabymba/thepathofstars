@@ -11,6 +11,7 @@ type Props = {
   reading: string;
   loading: boolean;
   onReset: () => void;
+  isGuestReading?: boolean;
 };
 
 function CardChip({ card, label }: { card: DrawnCard; label?: string }) {
@@ -41,7 +42,7 @@ function CardChip({ card, label }: { card: DrawnCard; label?: string }) {
   );
 }
 
-export default function ReadingResult({ cards, readingType, reading, loading, onReset }: Props) {
+export default function ReadingResult({ cards, readingType, reading, loading, onReset, isGuestReading }: Props) {
   const { t } = useLanguage();
   const isThree = readingType === "three-card";
 
@@ -87,6 +88,22 @@ export default function ReadingResult({ cards, readingType, reading, loading, on
           </p>
         )}
       </div>
+
+      {isGuestReading && !loading && (
+        <div
+          className="mt-5 flex items-center justify-between gap-4 px-5 py-4"
+          style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px" }}
+        >
+          <p style={{ color: "var(--text-secondary)" }} className="text-sm">{t.free_reading_used}</p>
+          <a
+            href="/login"
+            style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)", borderRadius: "100px" }}
+            className="text-xs px-4 py-2 whitespace-nowrap hover:opacity-80 transition-opacity"
+          >
+            {t.free_reading_signin}
+          </a>
+        </div>
+      )}
     </main>
   );
 }

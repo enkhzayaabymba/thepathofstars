@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ReadingType } from "@/lib/types";
 import { drawCards, DrawnCard } from "@/lib/tarot/drawCards";
 import ReadingResult from "@/components/ReadingResult";
@@ -13,7 +14,9 @@ export default function ReadingPage() {
   const [cards, setCards] = useState<DrawnCard[] | null>(null);
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isGuestReading, setIsGuestReading] = useState(false);
   const { t } = useLanguage();
+  const router = useRouter();
 
   const OPTIONS = [
     { type: "one-card" as ReadingType, label: t.one_card, desc: t.one_card_desc, cards: 1 },
@@ -23,13 +26,23 @@ export default function ReadingPage() {
   const selected = OPTIONS.find((o) => o.type === type)!;
 
   async function handleDraw() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const isLoggedIn = !!session;
+
+    if (!isLoggedIn) {
+      const freeUsed = localStorage.getItem("free_reading_used") === "true";
+      if (freeUsed) {
+        router.push("/login");
+        return;
+      }
+    }
+
     setLoading(true);
     setReading("");
     const drawn = drawCards(selected.cards);
     setCards(drawn);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: {
@@ -48,8 +61,12 @@ export default function ReadingPage() {
         text += decoder.decode(value, { stream: true });
         setReading(text);
       }
+      if (!isLoggedIn) {
+        localStorage.setItem("free_reading_used", "true");
+        setIsGuestReading(true);
+      }
     } catch {
-      setReading("Уншлага гарахад алдаа гарлаа. ANTHROPIC_API_KEY-г .env.local-д нэмсэн эсэхийг шалгаарай.");
+      setReading("Уншлага гарахад алдаа гарлаа.");
     } finally {
       setLoading(false);
     }
@@ -60,6 +77,7 @@ export default function ReadingPage() {
     setReading("");
     setQuestion("");
     setLoading(false);
+    setIsGuestReading(false);
   }
 
   if (cards) {
@@ -70,6 +88,7 @@ export default function ReadingPage() {
         reading={reading}
         loading={loading}
         onReset={handleReset}
+        isGuestReading={isGuestReading}
       />
     );
   }
