@@ -7,14 +7,12 @@ import { supabase } from "@/lib/supabase";
 import CartButton from "@/components/CartButton";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useTheme } from "@/lib/ThemeContext";
+import { checkIsAdmin } from "@/lib/adminCheck";
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-
-function AvatarDropdown({ email, onLogout }: { email: string; onLogout: () => void }) {
+function AvatarDropdown({ email, isAdmin, onLogout }: { email: string; isAdmin: boolean; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
-  const isAdmin = email === ADMIN_EMAIL;
 
   useEffect(() => {
     function onOutside(e: MouseEvent) {
@@ -60,6 +58,7 @@ function AvatarDropdown({ email, onLogout }: { email: string; onLogout: () => vo
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
   const { lang, setLang, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -70,13 +69,16 @@ export default function Navbar() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!email) { setIsAdmin(false); return; }
+    checkIsAdmin().then(setIsAdmin);
+  }, [email]);
+
   async function logout() {
     await supabase.auth.signOut();
     setMenuOpen(false);
     router.push("/");
   }
-
-  const isAdmin = email === ADMIN_EMAIL;
 
   const links = [
     { href: "/shop", label: t.nav_shop, icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> },
@@ -112,7 +114,7 @@ export default function Navbar() {
             {lang === "en" ? "MN" : "EN"}
           </button>
           {email
-            ? <AvatarDropdown email={email} onLogout={logout} />
+            ? <AvatarDropdown email={email} isAdmin={isAdmin} onLogout={logout} />
             : <Link href="/login" style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-main)" }}
                 className="text-sm px-5 py-2 rounded-full hover:opacity-80 transition-opacity">{t.nav_signin}</Link>
           }

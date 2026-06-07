@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { checkIsAdmin } from "@/lib/adminCheck";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -13,11 +12,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      const email = data.session?.user?.email;
-      if (!email || email !== ADMIN_EMAIL) router.push("/");
-      else setChecking(false);
-    });
+    async function verify() {
+      // Rule 2: Check 1 — is user logged in?
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { router.push("/login"); return; }
+
+      // Rule 2: Check 2 — is user an admin? (DB-verified, not email string)
+      const isAdmin = await checkIsAdmin();
+      if (!isAdmin) { router.push("/"); return; }
+
+      setChecking(false);
+    }
+    verify();
   }, [router]);
 
   if (checking) {
@@ -38,7 +44,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <AdminSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
 
       <main className="flex-1 overflow-auto min-w-0">
-        {/* Mobile-only top bar */}
         <div className="md:hidden flex items-center px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
           <button onClick={() => setSidebarOpen(true)} style={{ color: "var(--text-primary)" }}
             className="hover:opacity-70 transition-opacity">
@@ -48,7 +53,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </svg>
           </button>
         </div>
-
         <div className="p-4 md:p-10 max-w-5xl mx-auto w-full">{children}</div>
       </main>
     </div>
