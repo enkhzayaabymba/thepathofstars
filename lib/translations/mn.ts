@@ -108,6 +108,7 @@ const mn = {
   orders_empty: "Одоогоор захиалга байхгүй байна.",
   orders_count: "{n} захиалга",
   add_to_cart: "Сагсанд нэмэх",
+  loading: "Ачааллаж байна...",
   menu_label: "Цэс",
   settings_label: "Тохиргоо",
   theme_label: "Загвар",

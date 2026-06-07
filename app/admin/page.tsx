@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import StatsCard from "@/components/admin/StatsCard";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { supabase } from "@/lib/supabase";
 
 type Stats = {
@@ -13,6 +14,7 @@ type Stats = {
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({ totalOrders: 0, totalRevenue: 0, pendingOrders: 0, totalProducts: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadStats() {
@@ -27,10 +29,13 @@ export default function AdminDashboard() {
         pendingOrders: orders?.filter((o) => o.status === "pending").length ?? 0,
         totalProducts: products?.length ?? 0,
       });
+      setLoading(false);
     }
 
     loadStats();
   }, []);
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>

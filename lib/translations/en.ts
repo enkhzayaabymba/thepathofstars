@@ -108,6 +108,7 @@ const en = {
   orders_empty: "You have no orders yet.",
   orders_count: "{n} orders",
   add_to_cart: "Add to Cart",
+  loading: "Loading...",
   menu_label: "Menu",
   settings_label: "Settings",
   theme_label: "Theme",

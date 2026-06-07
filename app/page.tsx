@@ -7,14 +7,17 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Product } from "@/lib/types";
 import { useLanguage } from "@/lib/LanguageContext";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function HomePage() {
   const { t } = useLanguage();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.from("products").select("*").limit(3).then(({ data }) => {
       setFeaturedProducts((data as Product[]) ?? []);
+      setLoading(false);
     });
   }, []);
 
@@ -56,18 +59,20 @@ export default function HomePage() {
             {t.featured_products}
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredProducts.map((product) => (
-            <Link key={product.id} href="/shop">
-              <TarotCard
-                name={product.name}
-                description={product.description}
-                imageUrl={product.image_url}
-                price={product.price}
-              />
-            </Link>
-          ))}
-        </div>
+        {loading ? <LoadingSpinner /> : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredProducts.map((product) => (
+              <Link key={product.id} href="/shop">
+                <TarotCard
+                  name={product.name}
+                  description={product.description}
+                  imageUrl={product.image_url}
+                  price={product.price}
+                />
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
