@@ -19,8 +19,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function loadStats() {
       const [{ data: orders }, { data: products }] = await Promise.all([
-        supabase.from("orders").select("*"),
-        supabase.from("products").select("*"),
+        supabase.from("orders").select("id, status, price, quantity"),
+        supabase.from("products").select("id"),
       ]);
 
       setStats({

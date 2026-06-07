@@ -48,7 +48,10 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
 
   async function fetchOrders(isInitial = false) {
-    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("orders")
+      .select("id, order_id, user_email, status, created_at, price, quantity, product_name, image_url, address, phone")
+      .order("created_at", { ascending: false });
     if (data) {
       setOrders(groupOrders(data as Order[]));
       if (isInitial) {

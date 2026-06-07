@@ -5,6 +5,7 @@ import { ReadingType } from "@/lib/types";
 import { drawCards, DrawnCard } from "@/lib/tarot/drawCards";
 import ReadingResult from "@/components/ReadingResult";
 import { useLanguage } from "@/lib/LanguageContext";
+import { supabase } from "@/lib/supabase";
 
 export default function ReadingPage() {
   const [type, setType] = useState<ReadingType>("one-card");
@@ -28,9 +29,13 @@ export default function ReadingPage() {
     setCards(drawn);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch("/api/reading", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }),
+        },
         body: JSON.stringify({ cards: drawn, question, type }),
       });
       if (!res.ok || !res.body) throw new Error("API алдаа");
